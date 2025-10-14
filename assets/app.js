@@ -62,18 +62,37 @@
   }
 })();
 
-// ========== PRESSE: Laden & Rendern ==========
+// ========== PRESSE: Laden & Rendern mit Lazy Loading ==========
 (async function(){
   const grid = document.getElementById('news-grid');
   const emptyHint = document.getElementById('news-empty');
   if(!grid) return;
 
-  // Hilfsfunktion: Datum in ms (YYYY-MM-DD)
+  // Datum zu ms (YYYY-MM-DD)
   const toDate = (s) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((s || '').trim());
     if(!m) return NaN;
     return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
   };
+
+  // IntersectionObserver für Lazy Loading
+  const io = ('IntersectionObserver' in window)
+    ? new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          const bg = el.getAttribute('data-bg');
+          if (bg) {
+            // Hintergrund setzen, schöne Transition
+            el.style.backgroundImage = `url('${bg.replace(/'/g, "\\'")}')`;
+            el.classList.add('is-loaded');
+            el.classList.remove('is-loading');
+            el.removeAttribute('data-bg');
+          }
+          obs.unobserve(el);
+        });
+      }, { root: null, rootMargin: '200px 0px', threshold: 0.1 })
+    : null;
 
   try{
     const res = await fetch('data/presse.json?' + Date.now(), { cache: 'no-store' });
@@ -81,7 +100,7 @@
     const list = await res.json();
     const items = Array.isArray(list) ? list.slice() : [];
 
-    // ✅ neueste zuerst
+    // Neueste zuerst
     items.sort((a, b) => {
       const da = toDate(a.date);
       const db = toDate(b.date);
@@ -105,14 +124,20 @@
       const excerpt = (it.excerpt || '').trim();
       const img = (it.image || '').trim();
 
-      const mediaStyle = img ? `style="background-image:url('${img.replace(/"/g,'&quot;')}')"` : '';
-      const mediaClass = img ? 'news-media' : 'news-media news-media--placeholder';
+      // Für Lazy Loading: wir setzen NICHT sofort background-image,
+      // sondern tragen die URL in data-bg ein und markieren .is-loading.
+      // Wenn kein Bild vorhanden: Placeholder behalten, kein Lazy nötig.
+      const hasImg = !!img;
+      const mediaClass = hasImg
+        ? 'news-media is-loading'
+        : 'news-media news-media--placeholder';
+      const dataBgAttr = hasImg ? ` data-bg="${img.replace(/"/g, '&quot;')}"` : '';
       const meta = [source, date].filter(Boolean).join(' • ');
 
       return `
         <article class="news-card" role="listitem">
           <a href="${url}" target="_blank" rel="noopener" aria-label="Zum Artikel: ${title}">
-            <div class="${mediaClass}" ${mediaStyle}></div>
+            <div class="${mediaClass}"${dataBgAttr}></div>
           </a>
           <div class="news-body">
             <h3 class="news-title">
@@ -127,6 +152,22 @@
         </article>
       `;
     }).join('');
+
+    // Lazy Loading nach dem Einfügen initialisieren
+    if (io) {
+      grid.querySelectorAll('.news-media.is-loading[data-bg]').forEach(el => io.observe(el));
+    } else {
+      // Fallback ohne IntersectionObserver: sofort laden
+      grid.querySelectorAll('.news-media.is-loading[data-bg]').forEach(el => {
+        const bg = el.getAttribute('data-bg');
+        if (bg) {
+          el.style.backgroundImage = `url('${bg.replace(/'/g, "\\'")}')`;
+          el.classList.add('is-loaded');
+          el.classList.remove('is-loading');
+          el.removeAttribute('data-bg');
+        }
+      });
+    }
 
     if(emptyHint) emptyHint.style.display = 'none';
   }catch(err){
