@@ -6,7 +6,7 @@
   <title>Elterninitiative Königs Wusterhausen</title>
   <meta name="description" content="Elterninitiative Königs Wusterhausen – Transparenz, Termine und Engagement für faire Elternbeiträge in Krippe, Kita und Hort.">
 
-  <!-- Optionale Webfonts (fallbackt sauber auf System-Schriften) -->
+  <!-- Optionale Webfonts (fällt sauber auf System-Schriften zurück) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
@@ -72,12 +72,20 @@
     <!-- PRESSE -->
     <section id="presse" aria-labelledby="presse-heading">
       <h2 id="presse-heading">Presse & Veröffentlichungen</h2>
-      <p class="meta">Pressespiegel und eigene Stellungnahmen zur Elterninitiative.</p>
-      <ul class="list">
-        <li><a href="#" class="placeholder">[Link zu MAZ-Artikel einfügen]</a></li>
-        <li><a href="#" class="placeholder">[Link zu MOZ-Artikel einfügen]</a></li>
-        <li><a href="#" class="placeholder">[Eigene Stellungnahme / offener Brief einfügen]</a></li>
-      </ul>
+      <p class="meta">Aktuelle Artikel und Stellungnahmen – automatisch aus <code>data/presse.json</code>, neueste zuerst.</p>
+
+      <div id="news-grid" class="news-grid" role="list">
+        <article class="news-card" aria-busy="true">
+          <div class="news-media news-media--placeholder"></div>
+          <div class="news-body">
+            <h3 class="news-title">Lade Presseartikel …</h3>
+            <p class="news-excerpt">Bitte einen Moment Geduld.</p>
+            <p class="news-meta">Quelle • Datum</p>
+          </div>
+        </article>
+      </div>
+
+      <p class="meta" id="news-empty" style="display:none">Derzeit sind keine Presseartikel hinterlegt.</p>
     </section>
 
     <!-- MITMACHEN -->
@@ -112,7 +120,7 @@
   </main>
 
   <footer>
-  © Elterninitiative Königs Wusterhausen · Stand: Oktober 2025 ·
+    © Elterninitiative Königs Wusterhausen · Stand: Oktober 2025 ·
     <span class="links">
       <a href="impressum.html">Impressum</a> ·
       <a href="datenschutz.html">Datenschutz</a>
