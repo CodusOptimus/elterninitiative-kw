@@ -1,6 +1,6 @@
 {
   "source": "https://sessionnet.owl-it.de/koenigs_wusterhausen/bi/si0046.asp",
-  "generated_at": "2025-10-14T18:35:08.300178Z",
+  "generated_at": "2025-10-14T18:42:38.569176Z",
   "filters": [
     "Stadtverordnetenversammlung",
     "Hauptausschuss",
@@ -8,5 +8,23 @@
     "Sozialausschuss"
   ],
   "timezone": "Europe/Berlin",
+  "months_loaded": [
+    [
+      2025,
+      10
+    ],
+    [
+      2025,
+      11
+    ],
+    [
+      2025,
+      12
+    ],
+    [
+      2026,
+      1
+    ]
+  ],
   "items": []
 }
