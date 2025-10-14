@@ -1,0 +1,209 @@
+/* ===============================
+   Design Tokens / Light & Dark
+   =============================== */
+:root{
+  --bg: #fafafa;
+  --ink: #1f2937;
+  --muted: #64748b;
+
+  --brand: #0d4b7a;         /* seriöses KW-Blau */
+  --brand-2: #7ab7e6;       /* helles Akzentblau */
+  --accent: #ffe8a3;        /* warmes, familienfreundliches Gelb */
+  --card: #ffffff;
+  --card-muted: #f3f6fa;
+
+  --shadow: 0 8px 24px rgba(0,0,0,.08);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --maxw: 1100px;
+
+  --h1: clamp(1.8rem, 4.2vw, 2.6rem);
+  --h2: clamp(1.35rem, 3vw, 1.6rem);
+  --lead: clamp(1rem, 2.3vw, 1.15rem);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0b1220;
+    --ink: #e6edf3;
+    --muted: #a3b1c6;
+
+    --brand: #66a7e2;
+    --brand-2: #99c8ef;
+    --accent: #645217;
+    --card: #111a2e;
+    --card-muted: #10182a;
+
+    --shadow: 0 8px 28px rgba(0,0,0,.45);
+  }
+}
+
+/* ===============================
+   Base
+   =============================== */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Noto Sans", Arial, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a{color: var(--brand); text-decoration: none}
+a:hover{text-decoration: underline}
+.container{max-width: var(--maxw); margin: 0 auto; padding: 0 1.2rem}
+.sr-only{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+
+/* ===============================
+   Hero
+   =============================== */
+.hero{
+  position: relative;
+  padding: 4.5rem 0 3rem;
+  color: #fff;
+  background:
+    radial-gradient(1200px 500px at 50% -40%, rgba(122,183,230,.5), rgba(13,75,122,0)) ,
+    linear-gradient(180deg, var(--brand) 0%, #0b3f66 60%, #0b3f66 100%);
+  overflow: clip;
+}
+.hero::after{
+  content:"";
+  position:absolute; inset:auto 0 -1px 0;
+  height: 80px;
+  background:
+    radial-gradient(120px 50px at 10% 50%, rgba(255,255,255,.25), transparent 60%),
+    radial-gradient(140px 60px at 90% 40%, rgba(255,255,255,.20), transparent 70%),
+    linear-gradient(0deg, rgba(255,255,255,.12), rgba(255,255,255,.12));
+  opacity:.35;
+}
+.hero h1{
+  margin: 0 0 .6rem;
+  font-size: var(--h1);
+  letter-spacing: .2px;
+  font-weight: 700;
+  font-family: Nunito, Inter, system-ui, sans-serif;
+}
+.hero .lead{
+  margin: 0 0 1.2rem;
+  font-size: var(--lead);
+  opacity: .95;
+  max-width: 780px;
+}
+.cta-row{display:flex; gap:.8rem; flex-wrap:wrap; margin-top:1rem}
+.btn{
+  display:inline-block; border-radius: 999px; padding:.7rem 1rem; font-weight:600;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12); border: 1px solid rgba(255,255,255,.2);
+  backdrop-filter: saturate(140%) blur(2px);
+}
+.btn-primary{ background:#fff; color:#0b3f66 }
+.btn-ghost{ color:#fff }
+.hero-card{
+  margin-top: 2rem;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.12));
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: var(--radius);
+  padding: 1rem 1rem;
+  color: #eef7ff;
+}
+.hero-card p{margin:.35rem 0}
+.badge{
+  display:inline-block; background: var(--accent); color:#323232;
+  padding:.25rem .55rem; border-radius: 999px; font-weight:700; font-size:.8rem;
+  letter-spacing:.2px;
+}
+
+/* ===============================
+   Nav
+   =============================== */
+.nav{
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, #fff 85%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 8%, transparent);
+}
+@media (prefers-color-scheme: dark){
+  .nav{ background: color-mix(in srgb, #0b1220 78%, transparent) }
+}
+.nav .row{
+  display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap; padding:.6rem 0;
+}
+.nav a{
+  font-weight:600; padding:.45rem .75rem; border-radius: 10px;
+}
+.nav a:hover{
+  background: color-mix(in srgb, var(--brand) 16%, transparent);
+  text-decoration:none;
+}
+
+/* ===============================
+   Sections & Cards
+   =============================== */
+section{
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.2rem 1.1rem;
+  margin: 1.2rem 0;
+}
+section h2{
+  margin: 0 0 .35rem; font-size: var(--h2);
+  font-family: Nunito, Inter, system-ui, sans-serif;
+}
+.meta{color: var(--muted); font-size:.98rem; margin-bottom:.6rem}
+.note{
+  background: var(--card-muted);
+  border: 1px dashed color-mix(in srgb, var(--brand) 20%, #0000);
+  border-radius: var(--radius-sm);
+  padding:.7rem .8rem; color: color-mix(in srgb, var(--ink) 80%, #0000);
+  margin:.7rem 0 1rem;
+}
+
+/* Event-Liste als Karten */
+.events{display:grid; gap:.9rem; grid-template-columns: 1fr}
+@media (min-width: 720px){ .events{grid-template-columns: 1fr 1fr} }
+.event{
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--brand) 10%, transparent);
+  border-left: 6px solid var(--brand);
+  border-radius: 12px;
+  padding: .85rem .9rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark){
+  .event{ background: #0e1730 }
+}
+.event .title{font-weight:700; margin:0}
+.event .sub{color: var(--muted); margin:.15rem 0 .4rem; font-size:.95rem}
+.links a{margin-right: .75rem}
+
+/* Presse / Links */
+.list{margin:.4rem 0 0 1.1rem}
+.list li{margin:.3rem 0}
+
+/* Footer */
+footer{
+  text-align:center; color: var(--muted); padding:2rem 1rem 3rem;
+}
+footer .links a{margin: 0 .6rem}
+
+/* Buttons neutral */
+.btn-neutral{
+  display:inline-block; padding:.55rem .85rem; border-radius:10px; font-weight:600;
+  background: var(--card-muted); color: var(--ink); border:1px solid color-mix(in srgb, var(--brand) 10%, transparent);
+}
+.btn-neutral:hover{ text-decoration:none; background: color-mix(in srgb, var(--brand-2) 20%, var(--card-muted)) }
+
+/* Fokus-Styles (Accessibility) */
+a, button { outline: none }
+a:focus-visible, button:focus-visible{
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 55%, #fff);
+  border-radius: 10px;
+}
+
+/* Print: nur Inhalte */
+@media print{
+  header, .nav, footer { display:none !important }
+  body{ background:#fff; color:#000 }
+  section{ box-shadow:none; border:1px solid #ddd; }
+}
