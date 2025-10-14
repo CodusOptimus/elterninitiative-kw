@@ -1,48 +1,59 @@
 name: Scrape KW SessionNet Termine
 
 on:
-  schedule:
-    - cron: "17 5 * * *"   # 07:17 Berlin
-  workflow_dispatch: {}
-  push:
+  workflow_dispatch:          # manueller Start
+  push:                       # bei jedem Commit
     branches: [ main ]
+  schedule:                   # täglich um 6:30 Uhr morgens
+    - cron: '30 4 * * *'      # UTC -> 06:30 Deutschlandzeit
+
+permissions:
+  contents: write             # erlaubt Commit ins Repo
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    name: "KW-Termine abrufen und aktualisieren"
+
     steps:
-      - name: Checkout
+      - name: Repository auschecken
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Python einrichten
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Abhängigkeiten installieren
         run: |
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4
 
-      - name: Debug tree
-        run: |
-          echo "Branch:" $(git rev-parse --abbrev-ref HEAD)
-          find . -maxdepth 3 -type f | sort
-
-      - name: Run scraper
+      - name: Scraper ausführen
         run: |
           python scripts/scrape_termine.py
 
-      - name: Commit data if changed
+      - name: Debug-Dateien auflisten
+        run: |
+          echo "== Debug-Dateien unter data/debug =="
+          find data/debug -type f -name "sessionnet-*.html" -print || echo "(keine Debug-Dateien vorhanden)"
+          echo ""
+          ls -lh data/ || true
+
+      - name: Prüfen, ob sich Dateien geändert haben
+        id: git-check
+        run: |
+          if git diff --quiet data/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Änderungen committen und pushen
+        if: steps.git-check.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/termine.json data/termine.ics || true
-          if ! git diff --cached --quiet; then
-            git commit -m "chore(data): update termine (json+ics)"
-            git push
-          else
-            echo "No changes."
-          fi
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/termine.json data/termine.ics data/debug/ || true
+          git commit -m "Automatische Aktualisierung: KW-Termine und Debug-Snapshots aktualisiert"
+          git push
