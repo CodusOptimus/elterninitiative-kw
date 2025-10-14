@@ -2,7 +2,7 @@ name: Scrape KW SessionNet Termine
 
 on:
   schedule:
-    - cron: "17 5 * * *"
+    - cron: "17 5 * * *"   # 07:17 Berlin
   workflow_dispatch: {}
   push:
     branches: [ main ]
@@ -24,7 +24,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml
+          pip install requests beautifulsoup4
+
+      - name: Debug tree
+        run: |
+          echo "Branch:" $(git rev-parse --abbrev-ref HEAD)
+          find . -maxdepth 3 -type f | sort
 
       - name: Run scraper
         run: |
