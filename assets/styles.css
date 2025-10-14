@@ -253,7 +253,14 @@ a:focus-visible, button:focus-visible{
 .news-title a{ color: inherit; text-decoration: none }
 .news-title a:hover{ text-decoration: underline }
 
-.news-excerpt{ margin: 0; color: var(--ink) }
+.news-excerpt{
+  margin: 0;
+  color: var(--ink);
+  display: -webkit-box;              /* Line clamp */
+  -webkit-line-clamp: 3;             /* 3 Zeilen */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 @media (prefers-color-scheme: dark){
   .news-excerpt{ color: #d9e3ee }
 }
@@ -267,3 +274,20 @@ a:focus-visible, button:focus-visible{
   color: var(--brand);
 }
 .news-actions a:hover{ text-decoration: underline }
+
+/* Lazy Loading für News-Bilder */
+.news-media{
+  position: relative;
+  opacity: 1;
+  transition: opacity .4s ease, filter .4s ease;
+  will-change: opacity, filter, background-image;
+}
+.news-media.is-loading{
+  /* Platzhalter bleibt sichtbar (via .news-media--placeholder), ggf. leichtes Dimmen */
+  opacity: .85;
+  filter: blur(4px);
+}
+.news-media.is-loaded{
+  opacity: 1;
+  filter: blur(0);
+}
