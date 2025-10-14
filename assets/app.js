@@ -1,5 +1,7 @@
+// ========== TERMINE: Laden & Rendern ==========
 (async function(){
   const root = document.getElementById('events');
+  if(!root) return;
 
   function clear(){ root.innerHTML=''; }
   const empty = (msg='Aktuell liegen keine kommenden Termine vor.') => {
@@ -57,5 +59,78 @@
   }catch(err){
     console.error('[termine] Fehler:', err);
     empty('Termine konnten nicht geladen werden (Parsingfehler).');
+  }
+})();
+
+// ========== PRESSE: Laden & Rendern ==========
+(async function(){
+  const grid = document.getElementById('news-grid');
+  const emptyHint = document.getElementById('news-empty');
+  if(!grid) return;
+
+  // Hilfsfunktion: Datum in ms (YYYY-MM-DD)
+  const toDate = (s) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((s || '').trim());
+    if(!m) return NaN;
+    return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+  };
+
+  try{
+    const res = await fetch('data/presse.json?' + Date.now(), { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const list = await res.json();
+    const items = Array.isArray(list) ? list.slice() : [];
+
+    // ✅ neueste zuerst
+    items.sort((a, b) => {
+      const da = toDate(a.date);
+      const db = toDate(b.date);
+      if (isNaN(da) && isNaN(db)) return 0;
+      if (isNaN(da)) return 1;
+      if (isNaN(db)) return -1;
+      return db - da;
+    });
+
+    if(items.length === 0){
+      grid.innerHTML = '';
+      if(emptyHint) emptyHint.style.display = 'block';
+      return;
+    }
+
+    grid.innerHTML = items.map((it) => {
+      const title = (it.title || 'Artikel').trim();
+      const url = (it.url || '#').trim();
+      const source = (it.source || '').trim();
+      const date = (it.date || '').trim();
+      const excerpt = (it.excerpt || '').trim();
+      const img = (it.image || '').trim();
+
+      const mediaStyle = img ? `style="background-image:url('${img.replace(/"/g,'&quot;')}')"` : '';
+      const mediaClass = img ? 'news-media' : 'news-media news-media--placeholder';
+      const meta = [source, date].filter(Boolean).join(' • ');
+
+      return `
+        <article class="news-card" role="listitem">
+          <a href="${url}" target="_blank" rel="noopener" aria-label="Zum Artikel: ${title}">
+            <div class="${mediaClass}" ${mediaStyle}></div>
+          </a>
+          <div class="news-body">
+            <h3 class="news-title">
+              <a href="${url}" target="_blank" rel="noopener">${title}</a>
+            </h3>
+            <p class="news-excerpt">${excerpt || 'Kurzinfo folgt in Kürze.'}</p>
+            <p class="news-meta">${meta || '&nbsp;'}</p>
+            <div class="news-actions">
+              <a href="${url}" target="_blank" rel="noopener">Zum Artikel</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    if(emptyHint) emptyHint.style.display = 'none';
+  }catch(err){
+    console.error('[presse] Fehler:', err);
+    // Platzhalter bleibt stehen
   }
 })();
