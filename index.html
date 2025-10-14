@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elterninitiative Königs Wusterhausen</title>
+  <meta name="description" content="Elterninitiative Königs Wusterhausen – aktuelle Termine, Presseartikel und Mitmachmöglichkeiten rund um faire und planbare Elternbeiträge in Krippe, Kita und Hort.">
+  <style>
+    :root{
+      --bg:#f9f9f9;
+      --card:#ffffff;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --brand:#0d4b7a;
+      --brand-weak:#e6eff6;
+      --shadow:0 2px 6px rgba(0,0,0,.08);
+      --radius:14px;
+      --maxw:960px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;line-height:1.6}
+    header{
+      background:linear-gradient(180deg, var(--brand) 0%, #0b3f66 100%);
+      color:#fff;
+      padding:3rem 1rem 2.5rem;
+      text-align:center;
+    }
+    header h1{margin:0;font-size:clamp(1.6rem,3.2vw,2.2rem)}
+    header p{margin:.5rem 0 0;font-size:clamp(1rem,2.5vw,1.15rem);opacity:.95}
+    nav{
+      position:sticky;top:0;z-index:10;
+      background:#eef3f7;border-top:1px solid #dbe5ee;border-bottom:1px solid #dbe5ee;
+      display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;padding:.6rem .8rem
+    }
+    nav a{
+      color:var(--brand);text-decoration:none;font-weight:600;padding:.35rem .6rem;border-radius:8px
+    }
+    nav a:hover{background:var(--brand-weak)}
+    main{max-width:var(--maxw);margin:1.5rem auto;padding:0 1rem}
+    section{
+      background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:1.25rem 1.1rem;margin:1rem 0
+    }
+    section h2{margin:0 0 .75rem;font-size:1.25rem;border-bottom:2px solid var(--brand);padding-bottom:.4rem}
+    ul{margin:.25rem 0 0 1.2rem}
+    li{margin:.35rem 0}
+    .placeholder{color:var(--muted);text-decoration:none;border-bottom:1px dotted #b7c4cf;cursor:default}
+    .muted{color:var(--muted)}
+    .meta{font-size:.95rem;color:var(--muted)}
+    .grid{display:grid;gap:.75rem}
+    @media (min-width:860px){.grid-2{grid-template-columns:1fr 1fr}}
+    footer{
+      text-align:center;color:var(--muted);padding:2rem 1rem;margin-top:.5rem;background:#f0f3f6;border-top:1px solid #e3e8ee
+    }
+    .notice{background:#fff9e6;border:1px solid #ffe2a8;border-radius:10px;padding:.6rem .8rem;margin:.75rem 0;color:#6b5b27}
+    .linkrow a{margin-right:1rem}
+    .sr-only{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+  </style>
+</head>
+<body>
+  <a class="sr-only" href="#content">Zum Inhalt springen</a>
+
+  <header>
+    <h1>Elterninitiative Königs Wusterhausen</h1>
+    <p>Für faire und planbare Elternbeiträge in Krippe, Kita und Hort</p>
+  </header>
+
+  <nav>
+    <a href="#termine">Termine</a>
+    <a href="#presse">Presse</a>
+    <a href="#mitmachen">Mitmachen</a>
+    <a href="#infos">Informationen</a>
+    <a href="#kontakt">Kontakt</a>
+  </nav>
+
+  <main id="content">
+
+    <section id="termine">
+      <h2>Termine und Sitzungen</h2>
+      <p class="meta">Automatisch aktualisierte Auswahl kommender Sitzungen (Stadtverordnetenversammlung, Hauptausschuss, Sozialausschuss).</p>
+
+      <div class="notice">
+        Hinweis: Die Liste wird täglich aus dem öffentlichen SessionNet der Stadt Königs Wusterhausen aktualisiert.
+      </div>
+
+      <ul id="termine-list">
+        <li>Termine werden geladen …</li>
+      </ul>
+
+      <p class="linkrow">
+        Kalender abonnieren: <a href="data/termine.ics">ICS-Datei</a> ·
+        Rohdaten: <a href="data/termine.json">JSON</a>
+      </p>
+    </section>
+
+    <section id="presse">
+      <h2>Presse und Veröffentlichungen</h2>
+      <p>Hier sammeln wir Berichterstattungen und eigene Stellungnahmen zur Initiative.</p>
+      <ul>
+        <li><a href="#" class="placeholder">[Link zu MAZ-Artikel einfügen]</a></li>
+        <li><a href="#" class="placeholder">[Link zu MOZ-Artikel einfügen]</a></li>
+        <li><a href="#" class="placeholder">[Eigene Stellungnahme / offener Brief einfügen]</a></li>
+      </ul>
+    </section>
+
+    <section id="mitmachen">
+      <h2>Mitmachen</h2>
+      <div class="grid grid-2">
+        <div>
+          <p>Wir freuen uns über alle Eltern, die sich aktiv einbringen oder informiert bleiben möchten.</p>
+          <ul>
+            <li><a href="#" class="placeholder">[Link zur WhatsApp-Gruppe einfügen]</a></li>
+            <li><a href="#" class="placeholder">[Link zur Bewerbung Elternbeirat einfügen]</a></li>
+            <li><a href="#" class="placeholder">[Link zu Mitmach-Formular / Kontaktseite einfügen]</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="muted">Tipp: QR-Codes zu diesen Links können auf Plakaten/Flyern platziert werden.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="infos">
+      <h2>Informationen und Hintergründe</h2>
+      <p>Rechtliche und organisatorische Grundlagen zum Thema Elternbeiträge:</p>
+      <ul>
+        <li><a href="#" class="placeholder">[Link zum KitaG Brandenburg einfügen]</a></li>
+        <li><a href="#" class="placeholder">[Link zur Hauptsatzung der Stadt KW einfügen]</a></li>
+        <li><a href="#" class="placeholder">[Link zur aktuellen Beitragssatzung einfügen]</a></li>
+      </ul>
+    </section>
+
+    <section id="kontakt">
+      <h2>Kontakt</h2>
+      <p>Fragen, Anregungen oder Interesse an Mitarbeit? Wir freuen uns über Nachrichten.</p>
+      <p>E-Mail: <a href="#" class="placeholder">[E-Mail-Adresse einfügen]</a></p>
+    </section>
+
+  </main>
+
+  <footer>
+    © Elterninitiative Königs Wusterhausen · Stand: Oktober 2025 ·
+    <a href="#" class="placeholder">[Link zur finalen Website einfügen]</a>
+  </footer>
+
+  <script>
+  (async function(){
+    const list = document.getElementById('termine-list');
+    function render(items){
+      if (!items.length){
+        list.innerHTML = '<li>Aktuell liegen keine kommenden Termine vor.</li>';
+        return;
+      }
+      list.innerHTML = items.slice(0, 15).map(e => {
+        const date = e.date || '';
+        const time = e.time && e.time.start
+          ? (e.time.end ? `${e.time.start}–${e.time.end} Uhr` : `${e.time.start} Uhr`)
+          : '';
+        const loc = e.location ? `, ${e.location}` : '';
+        const link = e.detail_url ? ` — <a href="${e.detail_url}" target="_blank" rel="noopener">Details</a>` : '';
+        return `<li><strong>${e.title}</strong> – ${date}${time ? ', ' + time : ''}${loc}${link}</li>`;
+      }).join('');
+    }
+
+    try{
+      const res = await fetch('data/termine.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      render(Array.isArray(data.items) ? data.items : []);
+    }catch(err){
+      console.error(err);
+      list.innerHTML = '<li>Termine konnten nicht geladen werden. Bitte später erneut versuchen.</li>';
+    }
+  })();
+  </script>
+</body>
+</html>
