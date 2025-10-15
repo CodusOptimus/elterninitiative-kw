@@ -235,44 +235,46 @@ function safeLog(scope, err){ try{ console.error(`[${scope}]`, err); }catch(_){}
 /* =========================
    BEWERBUNG (isoliert & stabil)
    ========================= */
-(async function(){
-  try{
-    const root = document.getElementById('bewerbung');
-    if(!root) return;
+/* ========== BEWERBUNG ELTERNBEIRAT: Formular + Kids (Vor-/Nachname) + Preview + Mailto ========== */
+(function(){
+  const root = document.getElementById('bewerbung');
+  if(!root) return;
 
-    // Refs
-    const form      = document.getElementById('bewerbung-form');
-    const firstEl   = document.getElementById('bf-firstname');
-    const lastEl    = document.getElementById('bf-lastname');
-    const phoneEl   = document.getElementById('bf-phone');
-    const streetEl  = document.getElementById('bf-street');
-    const housenoEl = document.getElementById('bf-houseno');
-    const zipEl     = document.getElementById('bf-zip');
-    const cityEl    = document.getElementById('bf-city');
+  // UI-Refs
+  const firstEl   = document.getElementById('bf-firstname');
+  const lastEl    = document.getElementById('bf-lastname');
+  const phoneEl   = document.getElementById('bf-phone');
 
-    const kidsWrap  = document.getElementById('kids-list');
-    const addKidBtn = document.getElementById('add-kid');
-    const cta       = document.getElementById('bewerbung-cta');
-    const refreshBtn= document.getElementById('refresh-preview');
+  const streetEl  = document.getElementById('bf-street');
+  const housenoEl = document.getElementById('bf-houseno');
+  const zipEl     = document.getElementById('bf-zip');
+  const cityEl    = document.getElementById('bf-city');
 
-    const addrSrc = root.querySelector('#bew-addr .copy-source');
-    const subjSrc = root.querySelector('#bew-subj .copy-source');
-    const bodySrc = root.querySelector('#bew-body .copy-source');
+  const kidsWrap   = document.getElementById('kids-list');
+  const addKidBtn  = document.getElementById('add-kid');
+  const cta        = document.getElementById('bewerbung-cta');
+  const refreshBtn = document.getElementById('refresh-preview');
 
-    // Konfig laden
-    let CFG = {
-      to: 'buergermeisterin@stadt-kw.de',
-      subject: 'Bewerbung als Mitglied des Elternbeirats der Stadt Königs Wusterhausen',
-      intro: [
-        'Sehr geehrte Frau Bürgermeisterin,',
-        '',
-        'gemäß § 12 Abs. 3 der Hauptsatzung der Stadt Königs Wusterhausen bewerbe ich mich hiermit als Mitglied des Elternbeirats.',
-        '',
-        'Ich möchte mich aktiv an der Vertretung der Interessen der Kinder und Familien in unserer Stadt beteiligen und einen Beitrag zu einer konstruktiven Zusammenarbeit zwischen Eltern, Einrichtungen und Verwaltung leisten.',
-        ''
-      ],
-      closing: ['Mit freundlichen Grüßen','[VORNAME] [NACHNAME]']
-    };
+  const addrSrc = root.querySelector('#bew-addr .copy-source');
+  const subjSrc = root.querySelector('#bew-subj .copy-source');
+  const bodySrc = root.querySelector('#bew-body .copy-source');
+
+  // Konfig (aus JSON, aber mit robusten Defaults)
+  let CFG = {
+    to: 'buergermeisterin@stadt-kw.de',
+    subject: 'Bewerbung als Mitglied des Elternbeirats der Stadt Königs Wusterhausen',
+    intro: [
+      'Sehr geehrte Frau Bürgermeisterin,',
+      '',
+      'gemäß § 12 Abs. 3 der Hauptsatzung der Stadt Königs Wusterhausen bewerbe ich mich hiermit als Mitglied des Elternbeirats.',
+      '',
+      'Ich möchte mich aktiv an der Vertretung der Interessen der Kinder und Familien in unserer Stadt beteiligen und einen Beitrag zu einer konstruktiven Zusammenarbeit zwischen Eltern, Einrichtungen und Verwaltung leisten.',
+      ''
+    ],
+    closing: ['Mit freundlichen Grüßen','[VORNAME] [NACHNAME]']
+  };
+
+  (async () => {
     try{
       const res = await fetch('data/bewerbung.json?' + Date.now(), { cache: 'no-store' });
       if (res.ok){
@@ -284,167 +286,183 @@ function safeLog(scope, err){ try{ console.error(`[${scope}]`, err); }catch(_){}
           closing: Array.isArray(data.closing) ? data.closing : CFG.closing
         };
       }
-    }catch(e){ safeLog('bewerbung-config', e); }
+    }catch(e){ console.warn('[bewerbung-config]', e); }
+    render(); // erste Darstellung nach evtl. Konfig-Load
+  })();
 
-    // Helpers
-    function kidRow(name='', inst=''){
-      const row = document.createElement('div');
-      row.className = 'kid-row';
-      row.innerHTML = `
-        <div class="kid-col">
-          <label><span>Kind *</span>
-            <input type="text" class="kid-name" placeholder="Name des Kindes" value="${name.replace(/"/g,'&quot;')}">
-          </label>
-        </div>
-        <div class="kid-col">
-          <label><span>Einrichtung *</span>
-            <input type="text" class="kid-inst" placeholder="Name der Einrichtung" value="${inst.replace(/"/g,'&quot;')}">
-          </label>
-        </div>
-        <div class="kid-actions">
-          <button type="button" class="kid-remove btn-neutral" aria-label="Kind entfernen" title="Entfernen">Entfernen</button>
-        </div>
-      `;
-      return row;
-    }
-    function ensureAtLeastOneKid(){
-      if (!kidsWrap.querySelector('.kid-row')) kidsWrap.appendChild(kidRow());
-      updateRemoveButtons();
-    }
-    function updateRemoveButtons(){
-      const rows = kidsWrap.querySelectorAll('.kid-row');
-      kidsWrap.querySelectorAll('.kid-remove').forEach(btn => { btn.disabled = (rows.length <= 1); });
-    }
-    function readKids(){
-      const rows = Array.from(kidsWrap.querySelectorAll('.kid-row'));
-      return rows.map(r => ({
-        name: (r.querySelector('.kid-name')?.value || '').trim(),
-        inst: (r.querySelector('.kid-inst')?.value || '').trim()
-      })).filter(k => k.name || k.inst);
-    }
+  // Helpers
+  function kidRow(first='', last='', inst=''){
+    const row = document.createElement('div');
+    row.className = 'kid-row';
+    row.innerHTML = `
+      <div class="kid-col">
+        <label><span>Vorname des Kindes *</span>
+          <input type="text" class="kid-first" placeholder="Vorname" value="${first.replace(/"/g,'&quot;')}">
+        </label>
+      </div>
+      <div class="kid-col">
+        <label><span>Nachname des Kindes *</span>
+          <input type="text" class="kid-last" placeholder="Nachname" value="${last.replace(/"/g,'&quot;')}">
+        </label>
+      </div>
+      <div class="kid-col">
+        <label><span>Einrichtung *</span>
+          <input type="text" class="kid-inst" placeholder="Name der Einrichtung" value="${inst.replace(/"/g,'&quot;')}">
+        </label>
+      </div>
+      <div class="kid-actions">
+        <button type="button" class="kid-remove btn-neutral" aria-label="Kind entfernen" title="Entfernen">Entfernen</button>
+      </div>
+    `;
+    return row;
+  }
 
-    // Body mit CRLF (bessere Kompatibilität)
-    function buildBodyCRLF(){
-      const first = (firstEl?.value || '').trim();
-      const last  = (lastEl?.value || '').trim();
-      const phone = (phoneEl?.value || '').trim();
+  function ensureAtLeastOneKid(){
+    if (!kidsWrap.querySelector('.kid-row')) kidsWrap.appendChild(kidRow());
+    updateRemoveButtons();
+  }
 
-      const street  = (streetEl?.value  || '').trim();
-      const houseno = (housenoEl?.value || '').trim();
-      const zip     = (zipEl?.value     || '').trim();
-      const city    = (cityEl?.value    || '').trim();
+  function updateRemoveButtons(){
+    const rows = kidsWrap.querySelectorAll('.kid-row');
+    kidsWrap.querySelectorAll('.kid-remove').forEach(btn => { btn.disabled = (rows.length <= 1); });
+  }
 
-      const addrLine1 = [street, houseno].filter(Boolean).join(' ');
-      const addrLine2 = [zip, city].filter(Boolean).join(' ');
-      const addrFull  = [addrLine1, addrLine2].filter(Boolean).join(', ');
+  function readKids(){
+    return Array.from(kidsWrap.querySelectorAll('.kid-row')).map(r => ({
+      first: (r.querySelector('.kid-first')?.value || '').trim(),
+      last:  (r.querySelector('.kid-last')?.value  || '').trim(),
+      inst:  (r.querySelector('.kid-inst')?.value  || '').trim()
+    }));
+  }
 
-      const kids = readKids().filter(k => k.name && k.inst);
+  function buildBodyCRLF(){
+    const first = (firstEl?.value || '').trim();
+    const last  = (lastEl?.value  || '').trim();
+    const phone = (phoneEl?.value || '').trim();
 
-      const lines = [...CFG.intro];
+    const street  = (streetEl?.value  || '').trim();
+    const houseno = (housenoEl?.value || '').trim();
+    const zip     = (zipEl?.value     || '').trim();
+    const city    = (cityEl?.value    || '').trim();
 
-      if (kids.length){
-        lines.push('Meine Kinder:');
-        kids.forEach(k => lines.push(`• ${k.name} | ${k.inst}`));
-        lines.push('');
-      }
+    const addrLine1 = [street, houseno].filter(Boolean).join(' ');
+    const addrLine2 = [zip, city].filter(Boolean).join(' ');
+    const addrFull  = [addrLine1, addrLine2].filter(Boolean).join(', ');
 
-      const contact = [];
-      const fullName = [first, last].filter(Boolean).join(' ');
-      if (fullName) contact.push(fullName);
-      if (addrFull) contact.push(addrFull);
-      if (phone)    contact.push(phone);
-      if (contact.length){
-        lines.push('Kontaktdaten:');
-        contact.forEach(c => lines.push(c));
-        lines.push('');
-      }
+    const kids = readKids().filter(k => k.first || k.last || k.inst);
 
-      const closing = CFG.closing.map(l =>
-        l.replace('[VORNAME]', first || '').replace('[NACHNAME]', last || '')
-      );
-      lines.push(...closing);
+    const lines = [...CFG.intro];
 
-      return lines.join('\r\n'); // CRLF
-    }
-
-    function buildMailto(){
-      const body = buildBodyCRLF();
-      return `mailto:${CFG.to}?subject=${encodeURIComponent(CFG.subject)}&body=${encodeURIComponent(body)}`;
-    }
-
-    function validateMinimal(){
-      const first = (firstEl?.value || '').trim();
-      const last  = (lastEl?.value || '').trim();
-      const validKids = readKids().filter(k => k.name && k.inst);
-      return !!(first && last && validKids.length >= 1);
-    }
-
-    function renderPreviewAndLink(){
-      try{
-        addrSrc && (addrSrc.textContent = CFG.to || '');
-        subjSrc && (subjSrc.textContent = CFG.subject || '');
-        bodySrc && (bodySrc.textContent = buildBodyCRLF());
-        if (cta){
-          const href = buildMailto();
-          cta.setAttribute('href', href);
-          cta.setAttribute('aria-disabled', validateMinimal() ? 'false' : 'true');
-          cta.title = validateMinimal()
-            ? 'E-Mail in deinem Mailprogramm öffnen'
-            : 'Bitte Vorname, Nachname und mind. ein Kind mit Einrichtung angeben';
-        }
-      }catch(e){ safeLog('bewerbung-render', e); }
-    }
-
-    // Init + Events
-    ensureAtLeastOneKid();
-
-    if (addKidBtn){
-      addKidBtn.type = 'button';
-      addKidBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        kidsWrap.appendChild(kidRow());
-        updateRemoveButtons();
-        renderPreviewAndLink();
+    if (kids.length){
+      lines.push('Meine Kinder:');
+      kids.forEach(k => {
+        const nm = [k.first, k.last].filter(Boolean).join(' ').trim();
+        const row = nm && k.inst ? `• ${nm} | ${k.inst}` : (nm || k.inst ? `• ${[nm, k.inst].filter(Boolean).join(' | ')}` : '');
+        if (row) lines.push(row);
       });
+      lines.push('');
     }
-    kidsWrap.addEventListener('click', (e) => {
-      const btn = e.target.closest('.kid-remove');
-      if (!btn) return;
-      const rows = kidsWrap.querySelectorAll('.kid-row');
-      if (rows.length > 1){
-        btn.closest('.kid-row')?.remove();
-        updateRemoveButtons();
-        renderPreviewAndLink();
-      }
-    });
 
-    // Live-Update
-    [firstEl, lastEl, phoneEl, streetEl, housenoEl, zipEl, cityEl].forEach(el => {
-      el && el.addEventListener('input', renderPreviewAndLink);
-    });
-    kidsWrap.addEventListener('input', renderPreviewAndLink);
-    refreshBtn && refreshBtn.addEventListener('click', (e)=>{ e.preventDefault(); renderPreviewAndLink(); });
+    const contact = [];
+    const fullName = [first, last].filter(Boolean).join(' ');
+    if (fullName) contact.push(fullName);
+    if (addrFull) contact.push(addrFull);
+    if (phone)    contact.push(phone);
+    if (contact.length){
+      lines.push('Kontaktdaten:');
+      contact.forEach(c => lines.push(c));
+      lines.push('');
+    }
 
-    // Klick: nur blocken, wenn ungültig – sonst Browser nativ navigieren lassen
-    cta && cta.addEventListener('click', (e) => {
-      if (!validateMinimal()){
-        e.preventDefault();
-        alert('Bitte Vorname, Nachname sowie mindestens ein Kind mit Einrichtung angeben.');
-      }
-      // keine JS-Navigation – native mailto-Navigation des Browsers
-    });
+    const closing = CFG.closing.map(l =>
+      l.replace('[VORNAME]', first || '').replace('[NACHNAME]', last || '')
+    );
+    lines.push(...closing);
 
-    // Erste Vorschau + Link setzen
-    renderPreviewAndLink();
+    return lines.join('\r\n'); // CRLF für Mail-Clients
+  }
 
-    // Optional Auto-Open, nur wenn gültig
+  function buildMailto(){
+    const body = buildBodyCRLF();
+    return `mailto:${CFG.to}?subject=${encodeURIComponent(CFG.subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  // Mindestprüfung: Name (Eltern), mind. ein Kind mit Vor- & Nachname & Einrichtung, UND alle Adressfelder
+  function isValid(){
+    const first = (firstEl?.value || '').trim();
+    const last  = (lastEl?.value  || '').trim();
+    const street  = (streetEl?.value  || '').trim();
+    const houseno = (housenoEl?.value || '').trim();
+    const zip     = (zipEl?.value     || '').trim();
+    const city    = (cityEl?.value    || '').trim();
+
+    const kidsValid = readKids().some(k => k.first && k.last && k.inst);
+    const addrValid = !!(street && houseno && zip && city);
+    return !!(first && last && kidsValid && addrValid);
+  }
+
+  function render(){
+    // Vorschau IMMER aktualisieren, egal ob gültig oder nicht
     try{
-      const hash = (location.hash || '').toLowerCase();
-      const qs = new URLSearchParams(location.search);
-      const wantsAuto = hash.includes('#bewerbung') && (qs.get('auto') === '1' || hash.includes('auto=1'));
-      if (wantsAuto && validateMinimal()){
-        setTimeout(() => cta?.click(), 300);
+      addrSrc && (addrSrc.textContent = CFG.to || '');
+      subjSrc && (subjSrc.textContent = CFG.subject || '');
+      bodySrc && (bodySrc.textContent = buildBodyCRLF());
+      // Mailto-Link immer setzen (Browser nutzt ihn nur bei Klick)
+      if (cta){
+        cta.setAttribute('href', buildMailto());
+        cta.setAttribute('aria-disabled', isValid() ? 'false' : 'true');
+        cta.title = isValid()
+          ? 'E-Mail in deinem Mailprogramm öffnen'
+          : 'Bitte Pflichtfelder ausfüllen (Elternname, vollständige Adresse, mind. ein Kind mit Vor-/Nachname & Einrichtung).';
       }
-    }catch(e){ /* ignore */ }
-  }catch(err){ safeLog('bewerbung', err); }
+    }catch(e){ console.warn('[bewerbung-render]', e); }
+  }
+
+  // Init + Events
+  ensureAtLeastOneKid();
+
+  addKidBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    kidsWrap.appendChild(kidRow());
+    updateRemoveButtons();
+    render();
+  });
+
+  kidsWrap.addEventListener('click', (e) => {
+    const btn = e.target.closest('.kid-remove');
+    if (!btn) return;
+    const rows = kidsWrap.querySelectorAll('.kid-row');
+    if (rows.length > 1){
+      btn.closest('.kid-row')?.remove();
+      updateRemoveButtons();
+      render();
+    }
+  });
+
+  // Live-Update für alle Felder
+  [firstEl, lastEl, phoneEl, streetEl, housenoEl, zipEl, cityEl].forEach(el => {
+    el?.addEventListener('input', render);
+  });
+  kidsWrap.addEventListener('input', render);
+  refreshBtn?.addEventListener('click', (e)=>{ e.preventDefault(); render(); });
+
+  // Klick: blocken nur wenn ungültig (native mailto-Navigation sonst)
+  cta?.addEventListener('click', (e) => {
+    if (!isValid()){
+      e.preventDefault();
+      alert('Bitte gib Vorname und Nachname ein, ergänze eine vollständige Adresse (Straße, Hausnummer, PLZ, Ort) und trage mindestens ein Kind mit Vor- & Nachname und Einrichtung ein.');
+    }
+  });
+
+  // Erste Darstellung
+  render();
+
+  // Optional Auto-Open
+  try{
+    const hash = (location.hash || '').toLowerCase();
+    const qs = new URLSearchParams(location.search);
+    if (hash.includes('#bewerbung') && (qs.get('auto') === '1' || hash.includes('auto=1')) && isValid()){
+      setTimeout(() => cta?.click(), 300);
+    }
+  }catch(_) {}
 })();
