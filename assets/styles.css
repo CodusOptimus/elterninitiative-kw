@@ -348,3 +348,23 @@ a:focus-visible, button:focus-visible{
 @media (min-width:760px){
   .grid-2{ grid-template-columns: 1fr 1fr }
 }
+
+/* Bewerbung: Preview-Zeilenumbrüche hart erzwingen */
+#bew-body .copy-source{
+  white-space: break-spaces; /* zeigt \n und \r\n als echte Umbrüche */
+}
+
+/* Bewerbung: Kinderliste (3 Felder + Entfernen) */
+.kids-head{ display:flex; align-items:center; gap:.6rem; margin:.6rem 0 .3rem }
+.kids-list{ display:grid; gap:.6rem }
+.kid-row{
+  display:grid; gap:.6rem;
+  grid-template-columns: 1fr 1fr 1fr auto; /* Vorname | Nachname | Einrichtung | Entfernen */
+  align-items:end;
+}
+.kid-row .kid-actions{ align-self: stretch; display:flex; align-items:flex-end }
+.kid-row .kid-actions .btn-neutral{ white-space: nowrap }
+@media (max-width: 760px){
+  .kid-row{ grid-template-columns: 1fr }
+  .kid-row .kid-actions{ align-items:center }
+}
