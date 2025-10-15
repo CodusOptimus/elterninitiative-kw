@@ -1,0 +1,23 @@
+name: Validate presse.json
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "data/presse.json"
+      - "scripts/validate_presse.py"
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run validator
+        run: |
+          python scripts/validate_presse.py
