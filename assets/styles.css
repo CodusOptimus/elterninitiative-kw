@@ -246,13 +246,19 @@ a:focus-visible, button:focus-visible{
 .news-media{
   width: 100%;
   aspect-ratio: 16 / 9;
-  background-size: cover;
+  background-size: cover;         /* Standard: Fotos vollflächig */
   background-position: center;
   background-color: var(--card-muted);
   position: relative;
   opacity: 1;
   transition: opacity .4s ease, filter .4s ease;
   will-change: opacity, filter, background-image;
+}
+/* Logos/Icons: vollständig anzeigen, nicht beschneiden */
+.news-media--contain{
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #ffffff;      /* neutraler Hintergrund für transparente Logos */
 }
 .news-media--placeholder{
   background-image: linear-gradient(135deg, color-mix(in srgb, var(--brand) 14%, transparent), transparent);
