@@ -62,7 +62,7 @@
   }
 })();
 
-/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ (robust) ========== */
+/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ (mit Logo-Erkennung) ========== */
 (function(){
   const grid = document.getElementById('news-grid');
   const emptyHint = document.getElementById('news-empty');
@@ -76,11 +76,9 @@
   const toDate = (s) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((s || '').trim());
     if(!m) return NaN;
-    // Konstruktion über Date(yyyy, mm-1, dd) ist robust gegenüber Zeitzonen
     return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
   };
 
-  // IntersectionObserver für Lazy Loading
   const io = ('IntersectionObserver' in window)
     ? new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
@@ -98,6 +96,11 @@
       }, { root: null, rootMargin: '200px 0px', threshold: 0.1 })
     : null;
 
+  // Heuristik: Ist das Bild eher ein Logo/Icon?
+  function isLogoLike(url){
+    return /wikipedia|wikimedia|logo|\.svg(\?|$)|rbb24|ardmediathek/i.test(url || '');
+  }
+
   function cardHTML(it){
     const title = (it.title || 'Artikel').toString().trim();
     const url = (it.url || '#').toString().trim();
@@ -107,7 +110,10 @@
     const img = (it.image || '').toString().trim();
 
     const hasImg = !!img;
-    const mediaClass = hasImg ? 'news-media is-loading' : 'news-media news-media--placeholder';
+    const isLogo = hasImg && isLogoLike(img);
+    const mediaClass = hasImg
+      ? `news-media is-loading${isLogo ? ' news-media--contain' : ''}`
+      : 'news-media news-media--placeholder';
     const dataBgAttr = hasImg ? ` data-bg="${img.replace(/"/g, '&quot;')}"` : '';
     const meta = [source, date].filter(Boolean).join(' • ');
 
@@ -131,7 +137,6 @@
   }
 
   function renderChunk(){
-    // falls keine Items: sauber räumen & Button verstecken
     if (!Array.isArray(items) || items.length === 0){
       grid.innerHTML = '';
       if (emptyHint) emptyHint.style.display = 'block';
@@ -142,7 +147,6 @@
     const end = Math.min(cursor + pageSize, items.length);
     const slice = items.slice(cursor, end);
 
-    // Nichts mehr zu laden
     if (slice.length === 0){
       if (moreBtn) moreBtn.style.display = 'none';
       return;
@@ -156,7 +160,6 @@
     }
     grid.appendChild(frag);
 
-    // Lazy Loading nachregistrieren
     if (io){
       grid.querySelectorAll('.news-media.is-loading[data-bg]').forEach(el => io.observe(el));
     }else{
@@ -172,8 +175,6 @@
     }
 
     cursor = end;
-
-    // Button-Visibility
     if (cursor >= items.length){
       if (moreBtn) moreBtn.style.display = 'none';
     } else {
@@ -183,7 +184,6 @@
 
   async function init(){
     try{
-      // Platzhalter leeren, Button vorsorglich ausblenden bis Daten da sind
       grid.innerHTML = '';
       if (moreBtn) moreBtn.style.display = 'none';
       if (emptyHint) emptyHint.style.display = 'none';
@@ -192,15 +192,10 @@
       if(!res.ok) throw new Error('HTTP ' + res.status);
 
       let list;
-      try {
-        list = await res.json();
-      } catch (e) {
-        console.error('[presse] JSON-Parse-Fehler:', e);
-        list = [];
-      }
+      try { list = await res.json(); }
+      catch (e) { console.error('[presse] JSON-Parse-Fehler:', e); list = []; }
 
       items = Array.isArray(list) ? list.slice() : [];
-      // defensiv: felder auf strings trimmen
       items = items.map(it => ({
         title: (it && it.title ? String(it.title) : '').trim(),
         url: (it && it.url ? String(it.url) : '').trim(),
@@ -210,7 +205,6 @@
         excerpt: (it && it.excerpt ? String(it.excerpt) : '').trim()
       }));
 
-      // sort: newest first (leere/ungültige Daten ans Ende)
       items.sort((a,b) => {
         const da = toDate(a.date), db = toDate(b.date);
         if (isNaN(da) && isNaN(db)) return 0;
@@ -228,12 +222,11 @@
 
       renderChunk();
       if (moreBtn){
-        moreBtn.removeEventListener('click', renderChunk); // doppelte Listener vermeiden
+        moreBtn.removeEventListener('click', renderChunk);
         moreBtn.addEventListener('click', renderChunk);
       }
     }catch(err){
       console.error('[presse] Fehler:', err);
-      // Fallback: leer + Hinweis
       grid.innerHTML = '';
       if (emptyHint) emptyHint.style.display = 'block';
       if (moreBtn) moreBtn.style.display = 'none';
@@ -256,6 +249,4 @@
   }
   msg && msg.addEventListener('input', updateCount);
   updateCount();
-
-  // Kein Submit-Handler → aktueller Stand ohne Versand
 })();
