@@ -79,9 +79,25 @@
             <span>Telefonnummer</span>
             <input type="tel" id="bf-phone" placeholder="+49 …">
           </label>
+        </div>
+
+        <!-- Anschrift in Einzelteilen -->
+        <div class="grid-2">
           <label>
-            <span>Anschrift</span>
-            <input type="text" id="bf-address" placeholder="Straße Nr., PLZ Ort">
+            <span>Straße</span>
+            <input type="text" id="bf-street" placeholder="Straßenname">
+          </label>
+          <label>
+            <span>Hausnummer</span>
+            <input type="text" id="bf-houseno" placeholder="Nr.">
+          </label>
+          <label>
+            <span>Postleitzahl</span>
+            <input type="text" id="bf-zip" inputmode="numeric" pattern="[0-9]{5}" placeholder="z. B. 15711">
+          </label>
+          <label>
+            <span>Ort</span>
+            <input type="text" id="bf-city" placeholder="z. B. Königs Wusterhausen">
           </label>
         </div>
 
