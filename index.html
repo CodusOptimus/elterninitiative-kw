@@ -6,12 +6,10 @@
   <title>Elterninitiative Königs Wusterhausen</title>
   <meta name="description" content="Elterninitiative Königs Wusterhausen – Transparenz, Termine und Engagement für faire Elternbeiträge in Krippe, Kita und Hort.">
 
-  <!-- Optionale Webfonts (fällt sauber auf System-Schriften zurück) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
 
-  <!-- Ausgelagertes CSS -->
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
@@ -22,7 +20,7 @@
     <div class="container">
       <span class="badge">Elterninitiative KW</span>
       <h1>Für faire und planbare Elternbeiträge in Krippe, Kita und Hort</h1>
-      <p class="lead">Wir informieren, vernetzen und bringen Elternstimmen in die kommunalen Gremien. Auf dieser Seite findest du Termine der Stadtverordnetenversammlung und Ausschüsse, Pressespiegel, Mitmachmöglichkeiten und Hintergründe.</p>
+      <p class="lead">Wir informieren, vernetzen und bringen Elternstimmen in die kommunalen Gremien. Auf dieser Seite findest du Termine, Pressespiegel, Mitmachmöglichkeiten und Hintergründe.</p>
       <div class="cta-row">
         <a class="btn btn-primary" href="#mitmachen">Jetzt mitmachen</a>
         <a class="btn btn-ghost" href="#termine">Nächste Termine ansehen</a>
@@ -31,7 +29,7 @@
       <div class="hero-card">
         <p><strong>Transparenz:</strong> Termine und Beschlüsse verständlich aufbereitet.</p>
         <p><strong>Miteinander:</strong> Eltern vernetzen sich – sachlich, konstruktiv, lösungsorientiert.</p>
-        <p><strong>Aktuell:</strong> Daten werden täglich automatisch aus dem SessionNet geladen.</p>
+        <p><strong>Aktuell:</strong> Daten werden automatisiert aus dem SessionNet geladen.</p>
       </div>
     </div>
   </header>
@@ -40,6 +38,7 @@
   <div class="nav">
     <div class="row container">
       <a href="#termine">Termine</a>
+      <a href="#petition">Petition</a>
       <a href="#presse">Presse</a>
       <a href="#mitmachen">Mitmachen</a>
       <a href="#infos">Informationen</a>
@@ -52,7 +51,6 @@
     <!-- TERMINE -->
     <section id="termine" aria-labelledby="termine-heading">
       <h2 id="termine-heading">Kommende Sitzungen & Termine</h2>
-      <p class="meta">Automatisch aktualisiert (Stadtverordnetenversammlung, Hauptausschuss, Sozialausschuss).</p>
       <div class="note">Hinweis: Die Liste wird täglich aus dem öffentlichen SessionNet der Stadt Königs Wusterhausen aktualisiert.</div>
 
       <div id="events" class="events" role="list">
@@ -65,15 +63,27 @@
       <p class="links" style="margin-top:.8rem">
         Kalender abonnieren:
         <a class="btn-neutral" href="data/termine.ics">ICS-Datei</a>
-        <a class="btn-neutral" href="data/termine.json">JSON</a>
       </p>
+    </section>
+
+    <!-- PETITION -->
+    <section id="petition" aria-labelledby="petition-heading">
+      <h2 id="petition-heading">Petition: Faire Elternbeiträge in KW</h2>
+      <p class="meta">Abgeschlossen · ca. 1.500 Unterschriften · Übergabe am 13.10.2025 in der SVV</p>
+      <div class="events">
+        <article class="event">
+          <h3 class="title">Ergebnis & Übergabe</h3>
+          <p class="sub">Die Petition wurde am 13.10.2025 symbolisch an die Bürgermeisterin und die Vorsitzende der SVV übergeben.</p>
+          <div class="links">
+            <a href="[OPENPETITION-URL-EINFÜGEN]" target="_blank" rel="noopener">Petition auf openPetition ansehen</a>
+          </div>
+        </article>
+      </div>
     </section>
 
     <!-- PRESSE -->
     <section id="presse" aria-labelledby="presse-heading">
       <h2 id="presse-heading">Presse & Veröffentlichungen</h2>
-      <p class="meta">Aktuelle Artikel und Stellungnahmen – automatisch aus <code>data/presse.json</code>, neueste zuerst.</p>
-
       <div id="news-grid" class="news-grid" role="list">
         <article class="news-card" aria-busy="true">
           <div class="news-media news-media--placeholder"></div>
@@ -84,7 +94,9 @@
           </div>
         </article>
       </div>
-
+      <div class="news-more-wrap">
+        <button id="news-more" class="btn-neutral" type="button" aria-label="Weitere Artikel laden">Mehr laden</button>
+      </div>
       <p class="meta" id="news-empty" style="display:none">Derzeit sind keine Presseartikel hinterlegt.</p>
     </section>
 
@@ -94,15 +106,14 @@
       <p>Du möchtest dich beteiligen oder auf dem Laufenden bleiben? Super! Hier sind deine nächsten Schritte:</p>
       <ul class="list">
         <li><a href="#" class="placeholder">[Link zur WhatsApp-Gruppe einfügen]</a></li>
-        <li><a href="#" class="placeholder">[Link zur Bewerbung Elternbeirat einfügen]</a></li>
-        <li><a href="#" class="placeholder">[Link zum Mitmach-Formular / Kontaktseite einfügen]</a></li>
+        <li><a href="bewerbung-elternbeirat.html">Bewerbung für den Elternbeirat</a></li>
+        <li><a href="#" class="placeholder">[Link zum Mitmach-Formular einfügen]</a></li>
       </ul>
     </section>
 
     <!-- INFOS -->
     <section id="infos" aria-labelledby="infos-heading">
       <h2 id="infos-heading">Informationen & Hintergründe</h2>
-      <p class="meta">Rechtliche Grundlagen, Satzungen und Erklärtexte.</p>
       <ul class="list">
         <li><a href="#" class="placeholder">[Link zum KitaG Brandenburg einfügen]</a></li>
         <li><a href="#" class="placeholder">[Link zur Hauptsatzung der Stadt KW einfügen]</a></li>
@@ -113,8 +124,37 @@
     <!-- KONTAKT -->
     <section id="kontakt" aria-labelledby="kontakt-heading">
       <h2 id="kontakt-heading">Kontakt</h2>
-      <p>Fragen, Anregungen oder Interesse an Mitarbeit? Wir freuen uns über Nachrichten.</p>
-      <p>E-Mail: <a href="#" class="placeholder">[E-Mail-Adresse einfügen]</a></p>
+      <form id="contact-form" class="contact-form" novalidate>
+        <div class="grid-2">
+          <label>
+            <span>Betreff*</span>
+            <input type="text" name="subject" required maxlength="120" placeholder="Worum geht es?" />
+          </label>
+          <label>
+            <span>Name*</span>
+            <input type="text" name="name" required maxlength="80" placeholder="Dein Name" />
+          </label>
+        </div>
+        <div class="grid-2">
+          <label>
+            <span>E-Mail*</span>
+            <input type="email" name="email" required maxlength="120" placeholder="name@example.org" />
+          </label>
+          <label>
+            <span>Telefon (optional)</span>
+            <input type="tel" name="phone" maxlength="30" placeholder="+49 ..." />
+          </label>
+        </div>
+        <label>
+          <span>Nachricht* <small>(max. 600 Zeichen)</small></span>
+          <textarea name="message" id="message" required maxlength="600" placeholder="Deine Nachricht an uns …"></textarea>
+          <div class="counter"><span id="msg-count">0</span>/600</div>
+        </label>
+        <div class="actions">
+          <button type="submit" class="btn-neutral">Nachricht senden</button>
+          <span class="form-hint">Dein Mailprogramm öffnet sich mit einer vorbefüllten E-Mail.</span>
+        </div>
+      </form>
     </section>
 
   </main>
@@ -127,7 +167,6 @@
     </span>
   </footer>
 
-  <!-- Ausgelagertes JavaScript -->
   <script src="assets/app.js" defer></script>
 </body>
 </html>
