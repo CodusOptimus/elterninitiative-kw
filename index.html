@@ -19,7 +19,7 @@
         <a href="#bewerbung" class="btn btn-ghost">Bewerbung Elternbeirat</a>
       </div>
       <div class="hero-card">
-        <p><strong>Hinweis:</strong> Termine werden automatisch geladen. Pressebeiträge pflegst du in <code>data/presse.json</code>. Die Bewerbung für den Elternbeirat ist direkt hier auf der Seite möglich.</p>
+        <p><strong>Hinweis:</strong> Termine werden automatisch geladen. Pressebeiträge pflegst du in <code>data/presse.json</code>. Die Bewerbung für den Elternbeirat erstellst du direkt hier auf der Seite.</p>
       </div>
     </div>
   </header>
@@ -59,13 +59,48 @@
     <!-- Bewerbung Elternbeirat -->
     <section id="bewerbung">
       <h2>Bewerbung als Mitglied des Elternbeirats</h2>
-      <p class="meta">Schnellstart: Button öffnet eine vorformulierte E-Mail an die Stadt. Alternativ kannst du Adresse, Betreff und Text kopieren.</p>
-      <div class="note">
-        Tipp: Ersetze im Text die Platzhalter <code>[Name]</code>, <code>[Kind]</code>, <code>[Einrichtung]</code>, <code>[Telefonnummer]</code>, <code>[Anschrift]</code> mit deinen Angaben.
-      </div>
-      <p><a id="bewerbung-cta" class="btn btn-neutral" href="#">Bewerbung per E-Mail öffnen</a></p>
+      <p class="meta">Gib deine Daten ein, ergänze ggf. mehrere Kinder und öffne dann die vorformulierte E-Mail.</p>
 
-      <div class="copy-grid">
+      <div class="note">
+        Deine Angaben werden nur lokal im Browser verarbeitet und nicht gespeichert.
+      </div>
+
+      <form id="bewerbung-form" class="contact-form" novalidate>
+        <div class="grid-2">
+          <label>
+            <span>Vorname *</span>
+            <input type="text" id="bf-firstname" placeholder="Vorname" required>
+          </label>
+          <label>
+            <span>Nachname *</span>
+            <input type="text" id="bf-lastname" placeholder="Nachname" required>
+          </label>
+          <label>
+            <span>Telefonnummer</span>
+            <input type="tel" id="bf-phone" placeholder="+49 …">
+          </label>
+          <label>
+            <span>Anschrift</span>
+            <input type="text" id="bf-address" placeholder="Straße Nr., PLZ Ort">
+          </label>
+        </div>
+
+        <div class="kids-head">
+          <strong>Kinder (mindestens 1)</strong>
+          <button type="button" id="add-kid" class="btn-neutral" style="margin-left:.6rem">Kind hinzufügen</button>
+        </div>
+
+        <div id="kids-list" class="kids-list">
+          <!-- dynamische Kind-Zeilen -->
+        </div>
+
+        <div class="actions" style="margin-top:.8rem">
+          <a id="bewerbung-cta" class="btn-neutral" href="#">Bewerbung per E-Mail öffnen</a>
+          <button type="button" id="refresh-preview" class="btn-neutral">Vorschau aktualisieren</button>
+        </div>
+      </form>
+
+      <div class="copy-grid" style="margin-top:1rem">
         <!-- Adresse -->
         <div class="copy-card" id="bew-addr">
           <div class="copy-label">E-Mail-Adresse</div>
@@ -82,9 +117,9 @@
             <div class="copy-source">lade …</div>
           </div>
         </div>
-        <!-- Nachricht -->
+        <!-- Nachricht (Vorschau) -->
         <div class="copy-card" id="bew-body">
-          <div class="copy-label">E-Mail-Text (Vorlage)</div>
+          <div class="copy-label">E-Mail-Text (Vorschau)</div>
           <div class="copy-box copy-scroll">
             <button class="copy-btn" data-copy="#bew-body .copy-source" aria-label="Text kopieren" title="Kopieren">Kopieren</button>
             <div class="copy-source">lade …</div>
