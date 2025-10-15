@@ -32,12 +32,12 @@
     const raw = coerceItems(json);
 
     const items = raw.map(e => ({
-      title: (e?.title ?? '').toString().trim(),
-      date: (e?.date ?? '').toString().trim(),
-      start: (e?.time?.start ?? '').toString().trim(),
-      end: (e?.time?.end ?? '').toString().trim(),
-      location: (e?.location ?? '').toString().trim(),
-      url: (e?.detail_url ?? '').toString().trim()
+      title: (e && e.title ? String(e.title) : '').trim(),
+      date: (e && e.date ? String(e.date) : '').trim(),
+      start: (e && e.time && e.time.start ? String(e.time.start) : '').trim(),
+      end: (e && e.time && e.time.end ? String(e.time.end) : '').trim(),
+      location: (e && e.location ? String(e.location) : '').trim(),
+      url: (e && e.detail_url ? String(e.detail_url) : '').trim()
     })).sort((a,b)=> parseDate(a.date,a.start)-parseDate(b.date,b.start)).slice(0,20);
 
     clear();
@@ -62,7 +62,7 @@
   }
 })();
 
-/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ ========== */
+/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ (robust) ========== */
 (function(){
   const grid = document.getElementById('news-grid');
   const emptyHint = document.getElementById('news-empty');
@@ -73,10 +73,10 @@
   let cursor = 0;
   let items = [];
 
-  // Datum zu ms (YYYY-MM-DD)
   const toDate = (s) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((s || '').trim());
     if(!m) return NaN;
+    // Konstruktion über Date(yyyy, mm-1, dd) ist robust gegenüber Zeitzonen
     return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
   };
 
@@ -99,12 +99,12 @@
     : null;
 
   function cardHTML(it){
-    const title = (it.title || 'Artikel').trim();
-    const url = (it.url || '#').trim();
-    const source = (it.source || '').trim();
-    const date = (it.date || '').trim();
-    const excerpt = (it.excerpt || '').trim();
-    const img = (it.image || '').trim();
+    const title = (it.title || 'Artikel').toString().trim();
+    const url = (it.url || '#').toString().trim();
+    const source = (it.source || '').toString().trim();
+    const date = (it.date || '').toString().trim();
+    const excerpt = (it.excerpt || '').toString().trim();
+    const img = (it.image || '').toString().trim();
 
     const hasImg = !!img;
     const mediaClass = hasImg ? 'news-media is-loading' : 'news-media news-media--placeholder';
@@ -131,16 +131,32 @@
   }
 
   function renderChunk(){
+    // falls keine Items: sauber räumen & Button verstecken
+    if (!Array.isArray(items) || items.length === 0){
+      grid.innerHTML = '';
+      if (emptyHint) emptyHint.style.display = 'block';
+      if (moreBtn) moreBtn.style.display = 'none';
+      return;
+    }
+
     const end = Math.min(cursor + pageSize, items.length);
     const slice = items.slice(cursor, end);
-    const html = slice.map(cardHTML).join('');
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    while (temp.firstChild){
-      const node = temp.firstChild;
-      grid.appendChild(node);
-      temp.removeChild(node);
+
+    // Nichts mehr zu laden
+    if (slice.length === 0){
+      if (moreBtn) moreBtn.style.display = 'none';
+      return;
     }
+
+    const frag = document.createDocumentFragment();
+    const temp = document.createElement('div');
+    temp.innerHTML = slice.map(cardHTML).join('');
+    while (temp.firstChild){
+      frag.appendChild(temp.firstChild);
+    }
+    grid.appendChild(frag);
+
+    // Lazy Loading nachregistrieren
     if (io){
       grid.querySelectorAll('.news-media.is-loading[data-bg]').forEach(el => io.observe(el));
     }else{
@@ -154,7 +170,10 @@
         }
       });
     }
+
     cursor = end;
+
+    // Button-Visibility
     if (cursor >= items.length){
       if (moreBtn) moreBtn.style.display = 'none';
     } else {
@@ -164,10 +183,34 @@
 
   async function init(){
     try{
+      // Platzhalter leeren, Button vorsorglich ausblenden bis Daten da sind
+      grid.innerHTML = '';
+      if (moreBtn) moreBtn.style.display = 'none';
+      if (emptyHint) emptyHint.style.display = 'none';
+
       const res = await fetch('data/presse.json?' + Date.now(), { cache: 'no-store' });
       if(!res.ok) throw new Error('HTTP ' + res.status);
-      const list = await res.json();
+
+      let list;
+      try {
+        list = await res.json();
+      } catch (e) {
+        console.error('[presse] JSON-Parse-Fehler:', e);
+        list = [];
+      }
+
       items = Array.isArray(list) ? list.slice() : [];
+      // defensiv: felder auf strings trimmen
+      items = items.map(it => ({
+        title: (it && it.title ? String(it.title) : '').trim(),
+        url: (it && it.url ? String(it.url) : '').trim(),
+        source: (it && it.source ? String(it.source) : '').trim(),
+        date: (it && it.date ? String(it.date) : '').trim(),
+        image: (it && it.image ? String(it.image) : '').trim(),
+        excerpt: (it && it.excerpt ? String(it.excerpt) : '').trim()
+      }));
+
+      // sort: newest first (leere/ungültige Daten ans Ende)
       items.sort((a,b) => {
         const da = toDate(a.date), db = toDate(b.date);
         if (isNaN(da) && isNaN(db)) return 0;
@@ -176,40 +219,36 @@
         return db - da;
       });
 
-      grid.innerHTML = '';
+      cursor = 0;
+
       if(items.length === 0){
         if (emptyHint) emptyHint.style.display = 'block';
-        if (moreBtn) moreBtn.style.display = 'none';
         return;
       }
+
       renderChunk();
-      if (moreBtn) moreBtn.addEventListener('click', renderChunk);
+      if (moreBtn){
+        moreBtn.removeEventListener('click', renderChunk); // doppelte Listener vermeiden
+        moreBtn.addEventListener('click', renderChunk);
+      }
     }catch(err){
       console.error('[presse] Fehler:', err);
+      // Fallback: leer + Hinweis
+      grid.innerHTML = '';
+      if (emptyHint) emptyHint.style.display = 'block';
+      if (moreBtn) moreBtn.style.display = 'none';
     }
   }
   init();
 })();
 
-/* ========== KONTAKT: Zeichenzähler + Fetch-Submit (ohne Mailprogramm) ========== */
+/* ========== KONTAKT: Nur Zeichenzähler (kein Versand) ========== */
 (function(){
   const form = document.getElementById('contact-form');
   if(!form) return;
 
   const msg = form.querySelector('#message');
   const cnt = form.querySelector('#msg-count');
-
-  // === Einstellungen ===
-  // Trage hier deinen Formular-Endpoint ein (z. B. Formspree, Getform, Basin):
-  const FORM_ENDPOINT = '[FORM_ENDPOINT_URL]';  // z.B. https://formspree.io/f/abcd1234
-  const FIELD_MAP = {
-    subject: 'subject',
-    name:    'name',
-    email:   'email',
-    phone:   'phone',
-    message: 'message'
-  };
-  const TIMEOUT_MS = 15000;
 
   function updateCount(){
     if(!msg || !cnt) return;
@@ -218,144 +257,5 @@
   msg && msg.addEventListener('input', updateCount);
   updateCount();
 
-  // Info-Box (schließbar, auto-hide)
-  function showInfo(message, kind='info'){
-    const old = form.querySelector('.note[data-kind="contact-info"]');
-    if (old) old.remove();
-    const box = document.createElement('div');
-    box.className = 'note';
-    box.setAttribute('role', 'status');
-    box.setAttribute('aria-live', 'polite');
-    box.setAttribute('data-kind', 'contact-info');
-    box.style.display = 'flex';
-    box.style.justifyContent = 'space-between';
-    box.style.alignItems = 'center';
-    box.style.gap = '.8rem';
-    // Farbnuancen je nach Art
-    if (kind === 'error'){
-      box.style.background = '#ffe8e8';
-      box.style.borderColor = '#ffb3b3';
-      box.style.color = '#7a1f1f';
-    }
-    box.innerHTML = `
-      <span>${message}</span>
-      <button type="button" aria-label="Hinweis schließen" style="border:none;background:transparent;cursor:pointer;font-weight:700;">×</button>
-    `;
-    form.insertBefore(box, form.firstChild);
-    const closeBtn = box.querySelector('button');
-    closeBtn.addEventListener('click', () => box.remove());
-    // auto ausblenden nur bei Erfolg/Info
-    if (kind !== 'error') {
-      setTimeout(() => {
-        box.style.transition = 'opacity .3s ease';
-        box.style.opacity = '0';
-        setTimeout(() => box.remove(), 350);
-      }, 6000);
-    }
-  }
-
-  // Honeypot (Spam-Schutz): verstecktes Feld
-  let hp = form.querySelector('input[name="website"]');
-  if (!hp){
-    hp = document.createElement('input');
-    hp.type = 'text';
-    hp.name = 'website';
-    hp.autocomplete = 'off';
-    hp.tabIndex = -1;
-    hp.style.position = 'absolute';
-    hp.style.left = '-5000px';
-    hp.style.top = 'auto';
-    hp.style.width = '1px';
-    hp.style.height = '1px';
-    hp.style.opacity = '0';
-    form.appendChild(hp);
-  }
-
-  // Submit
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    // Simple Validierung
-    const f = new FormData(form);
-    const subject = (f.get('subject') || '').toString().trim();
-    const name    = (f.get('name')    || '').toString().trim();
-    const email   = (f.get('email')   || '').toString().trim();
-    const phone   = (f.get('phone')   || '').toString().trim();
-    const message = (f.get('message') || '').toString().trim();
-    const honey   = (f.get('website') || '').toString().trim(); // Bot?
-
-    if (honey){ // Bot-Feld gefüllt → abbrechen
-      showInfo('Anfrage konnte nicht gesendet werden (Spam-Verdacht).', 'error');
-      return;
-    }
-    if (!subject || !name || !email || !message){
-      showInfo('Bitte Betreff, Name, E-Mail und Nachricht ausfüllen.', 'error');
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-      showInfo('Bitte eine gültige E-Mail-Adresse angeben.', 'error');
-      return;
-    }
-    if (FORM_ENDPOINT.startsWith('[')){
-      showInfo('Formular ist noch nicht konfiguriert. Bitte Endpoint-URL in assets/app.js setzen.', 'error');
-      return;
-    }
-
-    // Button-Sperre & Ladezustand
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const oldText = submitBtn ? submitBtn.textContent : '';
-    if (submitBtn){
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Senden …';
-    }
-
-    // Payload: Für Formspree & Co. reicht FormData; JSON geht auch (je nach Anbieter).
-    // Wir senden JSON (sauberer) + Header. Bei Problemen auf FormData umstellen.
-    const payload = {
-      [FIELD_MAP.subject]: subject,
-      [FIELD_MAP.name]:    name,
-      [FIELD_MAP.email]:   email,
-      [FIELD_MAP.phone]:   phone,
-      [FIELD_MAP.message]: message
-    };
-
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    try{
-      const res = await fetch(FORM_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-
-      clearTimeout(t);
-
-      if (!res.ok){
-        // Versuch, Fehlermeldung zu lesen
-        let errText = '';
-        try { errText = (await res.text()).slice(0, 300); } catch(_) {}
-        console.error('[contact] HTTP', res.status, errText);
-        showInfo('Senden fehlgeschlagen. Bitte später erneut versuchen.', 'error');
-      } else {
-        showInfo('Danke! Deine Nachricht wurde erfolgreich übermittelt.');
-        form.reset();
-        updateCount();
-      }
-    } catch(err){
-      clearTimeout(t);
-      console.error('[contact] Fehler:', err);
-      const aborted = err && (err.name === 'AbortError');
-      showInfo(aborted ? 'Zeitüberschreitung beim Senden. Bitte erneut versuchen.' : 'Unerwarteter Fehler beim Senden.', 'error');
-    } finally {
-      if (submitBtn){
-        submitBtn.disabled = false;
-        submitBtn.textContent = oldText;
-      }
-    }
-  });
+  // Kein Submit-Handler → aktueller Stand ohne Versand
 })();
