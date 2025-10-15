@@ -62,7 +62,7 @@
   }
 })();
 
-/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ (mit Logo-Heuristik) ========== */
+/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ (Logo-Heuristik) ========== */
 (function(){
   const grid = document.getElementById('news-grid');
   const emptyHint = document.getElementById('news-empty');
@@ -234,79 +234,204 @@
   init();
 })();
 
-/* ========== BEWERBUNG ELTERNBEIRAT: Mailto + Copy-Buttons aus data/bewerbung.json ========== */
+/* ========== BEWERBUNG ELTERNBEIRAT: Formular + Kinder add/remove + Mailto/Vorschau ========== */
 (async function(){
   const root = document.getElementById('bewerbung');
   if(!root) return;
 
+  // UI-Refs
+  const form = document.getElementById('bewerbung-form');
+  const firstEl = document.getElementById('bf-firstname');
+  const lastEl  = document.getElementById('bf-lastname');
+  const phoneEl = document.getElementById('bf-phone');
+  const addrEl  = document.getElementById('bf-address');
+  const kidsWrap = document.getElementById('kids-list');
+  const addKidBtn = document.getElementById('add-kid');
   const cta = document.getElementById('bewerbung-cta');
+  const refreshBtn = document.getElementById('refresh-preview');
+
   const addrSrc = root.querySelector('#bew-addr .copy-source');
   const subjSrc = root.querySelector('#bew-subj .copy-source');
   const bodySrc = root.querySelector('#bew-body .copy-source');
 
-  function updateUI(to, subject, bodyLines){
-    const bodyText = Array.isArray(bodyLines) ? bodyLines.join('\n') : String(bodyLines || '');
-    if (addrSrc) addrSrc.textContent = to || '';
-    if (subjSrc) subjSrc.textContent = subject || '';
-    if (bodySrc) bodySrc.textContent = bodyText || '';
-
-    function buildMailto(){
-      return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-    }
-    if (cta){
-      cta.href = '#';
-      cta.addEventListener('click', (e) => {
-        e.preventDefault();
-        const url = buildMailto();
-        try { window.location.href = url; } catch(_) {}
-        setTimeout(() => {
-          try{
-            const a = document.createElement('a');
-            a.href = url; a.style.display = 'none';
-            document.body.appendChild(a); a.click(); a.remove();
-          }catch(_){}
-        }, 150);
-      });
-    }
-
-    // Optional: Auto-Open, wenn gezielt verlinkt
-    try{
-      const hash = (location.hash || '').toLowerCase();
-      const qs = new URLSearchParams(location.search);
-      const wantsAuto = hash.includes('#bewerbung') && (qs.get('auto') === '1' || hash.includes('auto=1'));
-      if (wantsAuto && cta){
-        setTimeout(() => cta.click(), 300);
-      }
-    }catch(_){}
-  }
+  // Konfiguration laden
+  let CFG = {
+    to: 'buergermeisterin@stadt-kw.de',
+    subject: 'Bewerbung als Mitglied des Elternbeirats der Stadt Königs Wusterhausen',
+    intro: [
+      'Sehr geehrte Frau Bürgermeisterin,',
+      '',
+      'gemäß § 12 Abs. 3 der Hauptsatzung der Stadt Königs Wusterhausen bewerbe ich mich hiermit als Mitglied des Elternbeirats.',
+      '',
+      'Ich möchte mich aktiv an der Vertretung der Interessen der Kinder und Familien in unserer Stadt beteiligen und einen Beitrag zu einer konstruktiven Zusammenarbeit zwischen Eltern, Einrichtungen und Verwaltung leisten.',
+      ''
+    ],
+    closing: ['Mit freundlichen Grüßen','[VORNAME] [NACHNAME]']
+  };
 
   try{
     const res = await fetch('data/bewerbung.json?' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    updateUI(data.to || '', data.subject || '', data.body || '');
+    if (res.ok){
+      const data = await res.json();
+      CFG = {
+        to: data.to || CFG.to,
+        subject: data.subject || CFG.subject,
+        intro: Array.isArray(data.intro) ? data.intro : CFG.intro,
+        closing: Array.isArray(data.closing) ? data.closing : CFG.closing
+      };
+    }
   }catch(err){
-    console.error('[bewerbung] Daten konnten nicht geladen werden:', err);
-    // Fallback auf sinnvolle Defaults, damit die Section trotzdem nutzbar bleibt
-    updateUI(
-      'buergermeisterin@stadt-kw.de',
-      'Bewerbung als Mitglied des Elternbeirats der Stadt Königs Wusterhausen',
-      [
-        'Sehr geehrte Frau Bürgermeisterin,',
-        '',
-        'gemäß § 12 Abs. 3 der Hauptsatzung der Stadt Königs Wusterhausen bewerbe ich mich hiermit als Mitglied des Elternbeirats.',
-        '',
-        'Ich möchte mich aktiv an der Vertretung der Interessen der Kinder und Familien in unserer Stadt beteiligen und einen Beitrag zu einer konstruktiven Zusammenarbeit zwischen Eltern, Einrichtungen und Verwaltung leisten.',
-        '',
-        'Mit freundlichen Grüßen',
-        '[Name]',
-        '[Kind] | [Einrichtung]',
-        '[Telefonnummer] | [Anschrift]'
-      ]
-    );
+    console.warn('[bewerbung] Verwende Default-Konfig (Ladefehler).', err);
   }
 
-  // Delegierter Copy-Handler
+  // Hilfsfunktionen
+  function kidRow(name='', inst=''){
+    const id = 'kid-' + Math.random().toString(36).slice(2,8);
+    const row = document.createElement('div');
+    row.className = 'kid-row';
+    row.innerHTML = `
+      <div class="kid-col">
+        <label><span>Kind *</span>
+          <input type="text" class="kid-name" placeholder="Name des Kindes" value="${name.replace(/"/g,'&quot;')}">
+        </label>
+      </div>
+      <div class="kid-col">
+        <label><span>Einrichtung *</span>
+          <input type="text" class="kid-inst" placeholder="Name der Einrichtung" value="${inst.replace(/"/g,'&quot;')}">
+        </label>
+      </div>
+      <div class="kid-actions">
+        <button type="button" class="kid-remove btn-neutral" aria-label="Kind entfernen" title="Entfernen">Entfernen</button>
+      </div>
+    `;
+    return row;
+  }
+
+  function ensureAtLeastOneKid(){
+    if (!kidsWrap.querySelector('.kid-row')){
+      kidsWrap.appendChild(kidRow());
+    }
+    updateRemoveButtons();
+  }
+
+  function updateRemoveButtons(){
+    const rows = kidsWrap.querySelectorAll('.kid-row');
+    kidsWrap.querySelectorAll('.kid-remove').forEach(btn => {
+      btn.disabled = (rows.length <= 1);
+    });
+  }
+
+  function readKids(){
+    const rows = Array.from(kidsWrap.querySelectorAll('.kid-row'));
+    return rows.map(r => ({
+      name: (r.querySelector('.kid-name')?.value || '').trim(),
+      inst: (r.querySelector('.kid-inst')?.value || '').trim()
+    })).filter(k => k.name || k.inst);
+  }
+
+  function buildBody(){
+    const first = (firstEl.value || '').trim();
+    const last  = (lastEl.value || '').trim();
+    const phone = (phoneEl.value || '').trim();
+    const addr  = (addrEl.value || '').trim();
+    const kids  = readKids().filter(k => k.name && k.inst);
+
+    // Intro
+    const lines = [...CFG.intro];
+
+    // Kinder-Liste
+    if (kids.length){
+      lines.push('Meine Kinder:');
+      kids.forEach(k => {
+        lines.push(`• ${k.name} | ${k.inst}`);
+      });
+      lines.push('');
+    }
+
+    // Kontaktdaten
+    const contact = [];
+    if (first || last) contact.push(`${first} ${last}`.trim());
+    if (addr) contact.push(addr);
+    if (phone) contact.push(phone);
+    if (contact.length){
+      lines.push('Kontaktdaten:');
+      contact.forEach(c => lines.push(c));
+      lines.push('');
+    }
+
+    // Closing (mit Namen ersetzt)
+    const closing = CFG.closing.map(l =>
+      l.replace('[VORNAME]', first || '').replace('[NACHNAME]', last || '')
+    );
+    lines.push(...closing);
+
+    return lines.join('\n');
+  }
+
+  function buildMailto(){
+    const body = buildBody();
+    return `mailto:${CFG.to}?subject=${encodeURIComponent(CFG.subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  function validateMinimal(){
+    const first = (firstEl.value || '').trim();
+    const last  = (lastEl.value || '').trim();
+    const validKids = readKids().filter(k => k.name && k.inst);
+    return !!(first && last && validKids.length >= 1);
+  }
+
+  function renderPreview(){
+    // Ziel/Betreff
+    if (addrSrc) addrSrc.textContent = CFG.to || '';
+    if (subjSrc) subjSrc.textContent = CFG.subject || '';
+    // Body
+    if (bodySrc) bodySrc.textContent = buildBody();
+  }
+
+  // Initiale Kinderzeile und Events
+  ensureAtLeastOneKid();
+  addKidBtn?.addEventListener('click', () => {
+    kidsWrap.appendChild(kidRow());
+    updateRemoveButtons();
+    renderPreview();
+  });
+  kidsWrap.addEventListener('click', (e) => {
+    const btn = e.target.closest('.kid-remove');
+    if (!btn) return;
+    const rows = kidsWrap.querySelectorAll('.kid-row');
+    if (rows.length > 1){
+      btn.closest('.kid-row')?.remove();
+      updateRemoveButtons();
+      renderPreview();
+    }
+  });
+
+  // Live-Update bei Eingaben
+  [firstEl, lastEl, phoneEl, addrEl].forEach(el => {
+    el?.addEventListener('input', renderPreview);
+  });
+  kidsWrap.addEventListener('input', renderPreview);
+  refreshBtn?.addEventListener('click', (e) => { e.preventDefault(); renderPreview(); });
+
+  // CTA → E-Mail öffnen (mit Minimal-Validierung)
+  cta?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!validateMinimal()){
+      alert('Bitte Vorname, Nachname sowie mindestens ein Kind mit Einrichtung angeben.');
+      return;
+    }
+    const url = buildMailto();
+    try { window.location.href = url; } catch(_) {}
+    setTimeout(() => {
+      try{
+        const a = document.createElement('a');
+        a.href = url; a.style.display = 'none';
+        document.body.appendChild(a); a.click(); a.remove();
+      }catch(_){}
+    }, 150);
+  });
+
+  // Copy-Buttons (delegiert)
   root.addEventListener('click', async (e) => {
     const btn = e.target.closest('.copy-btn');
     if (!btn) return;
@@ -325,6 +450,19 @@
       console.error('[bewerbung] Copy fehlgeschlagen', err);
     }
   });
+
+  // Erste Vorschau nach Laden
+  renderPreview();
+
+  // Optionales Auto-Open, wenn gültig
+  try{
+    const hash = (location.hash || '').toLowerCase();
+    const qs = new URLSearchParams(location.search);
+    const wantsAuto = hash.includes('#bewerbung') && (qs.get('auto') === '1' || hash.includes('auto=1'));
+    if (wantsAuto && validateMinimal()){
+      setTimeout(() => cta?.click(), 300);
+    }
+  }catch(_){}
 })();
 
 /* ========== KONTAKT: Nur Zeichenzähler (kein Versand) ========== */
