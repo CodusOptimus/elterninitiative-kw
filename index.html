@@ -60,11 +60,11 @@
     <section id="bewerbung">
       <h2>Bewerbung als Mitglied des Elternbeirats</h2>
       <p class="meta">Gib deine Daten ein, ergänze ggf. mehrere Kinder und öffne dann die vorformulierte E-Mail.</p>
-
+    
       <div class="note">
-        Deine Angaben werden nur lokal im Browser verarbeitet und nicht gespeichert.
+        Deine Angaben werden nur lokal im Browser verarbeitet und nicht gespeichert. Felder mit * sind Pflicht.
       </div>
-
+    
       <form id="bewerbung-form" class="contact-form" novalidate>
         <div class="grid-2">
           <label>
@@ -80,42 +80,42 @@
             <input type="tel" id="bf-phone" placeholder="+49 …">
           </label>
         </div>
-
-        <!-- Anschrift in Einzelteilen -->
+    
+        <!-- Anschrift in Einzelteilen (alle Pflicht) -->
         <div class="grid-2">
           <label>
-            <span>Straße</span>
-            <input type="text" id="bf-street" placeholder="Straßenname">
+            <span>Straße *</span>
+            <input type="text" id="bf-street" placeholder="Straßenname" required>
           </label>
           <label>
-            <span>Hausnummer</span>
-            <input type="text" id="bf-houseno" placeholder="Nr.">
+            <span>Hausnummer *</span>
+            <input type="text" id="bf-houseno" placeholder="Nr." required>
           </label>
           <label>
-            <span>Postleitzahl</span>
-            <input type="text" id="bf-zip" inputmode="numeric" pattern="[0-9]{5}" placeholder="z. B. 15711">
+            <span>Postleitzahl *</span>
+            <input type="text" id="bf-zip" inputmode="numeric" pattern="[0-9]{5}" placeholder="z. B. 15711" required>
           </label>
           <label>
-            <span>Ort</span>
-            <input type="text" id="bf-city" placeholder="z. B. Königs Wusterhausen">
+            <span>Ort *</span>
+            <input type="text" id="bf-city" placeholder="z. B. Königs Wusterhausen" required>
           </label>
         </div>
-
+    
         <div class="kids-head">
           <strong>Kinder (mindestens 1)</strong>
           <button type="button" id="add-kid" class="btn-neutral" style="margin-left:.6rem">Kind hinzufügen</button>
         </div>
-
+    
         <div id="kids-list" class="kids-list">
-          <!-- dynamische Kind-Zeilen -->
+          <!-- dynamische Kind-Zeilen: Vorname*, Nachname*, Einrichtung* -->
         </div>
-
+    
         <div class="actions" style="margin-top:.8rem">
           <a id="bewerbung-cta" class="btn-neutral" href="#">Bewerbung per E-Mail öffnen</a>
           <button type="button" id="refresh-preview" class="btn-neutral">Vorschau aktualisieren</button>
         </div>
       </form>
-
+    
       <div class="copy-grid" style="margin-top:1rem">
         <!-- Adresse -->
         <div class="copy-card" id="bew-addr">
@@ -138,11 +138,11 @@
           <div class="copy-label">E-Mail-Text (Vorschau)</div>
           <div class="copy-box copy-scroll">
             <button class="copy-btn" data-copy="#bew-body .copy-source" aria-label="Text kopieren" title="Kopieren">Kopieren</button>
-            <div class="copy-source">lade …</div>
+            <div class="copy-source" id="bewerbung-preview">lade …</div>
           </div>
         </div>
       </div>
-
+    
       <div class="note" style="margin-top:.8rem">
         Optional: Rufe die Seite mit <code>#bewerbung?auto=1</code> auf, um das E-Mail-Fenster automatisch zu öffnen (falls dein Browser das erlaubt).
       </div>
