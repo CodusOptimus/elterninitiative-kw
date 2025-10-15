@@ -62,3 +62,7 @@ Verweise auf externe Quellen (z. B. Stadt Königs Wusterhausen, Landesrecht Bran
 
 © Elterninitiative Königs Wusterhausen · Stand: Oktober 2025  
 [Link zur Website einfügen]
+
+### Hinweis zu RBB-Beitrag
+Der rbb24-Bericht *„Steigende Kita-Gebühren“* (Ausstrahlung am 09.10.2025) war bis zum 16.10.2025 in der ARD Mediathek verfügbar.
+Eine private Kopie wurde mit Genehmigung des RBB an Elisa Clauß übergeben und wird nicht öffentlich bereitgestellt.
