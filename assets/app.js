@@ -1,4 +1,4 @@
-// ========== TERMINE: Laden & Rendern ==========
+/* ========== TERMINE: Laden & Rendern ========== */
 (async function(){
   const root = document.getElementById('events');
   if(!root) return;
@@ -62,11 +62,16 @@
   }
 })();
 
-// ========== PRESSE: Laden & Rendern mit Lazy Loading ==========
-(async function(){
+/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ ========== */
+(function(){
   const grid = document.getElementById('news-grid');
   const emptyHint = document.getElementById('news-empty');
+  const moreBtn = document.getElementById('news-more');
   if(!grid) return;
+
+  const pageSize = 6;
+  let cursor = 0;
+  let items = [];
 
   // Datum zu ms (YYYY-MM-DD)
   const toDate = (s) => {
@@ -83,7 +88,6 @@
           const el = entry.target;
           const bg = el.getAttribute('data-bg');
           if (bg) {
-            // Hintergrund setzen, schöne Transition
             el.style.backgroundImage = `url('${bg.replace(/'/g, "\\'")}')`;
             el.classList.add('is-loaded');
             el.classList.remove('is-loading');
@@ -94,70 +98,53 @@
       }, { root: null, rootMargin: '200px 0px', threshold: 0.1 })
     : null;
 
-  try{
-    const res = await fetch('data/presse.json?' + Date.now(), { cache: 'no-store' });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const list = await res.json();
-    const items = Array.isArray(list) ? list.slice() : [];
+  function cardHTML(it){
+    const title = (it.title || 'Artikel').trim();
+    const url = (it.url || '#').trim();
+    const source = (it.source || '').trim();
+    const date = (it.date || '').trim();
+    const excerpt = (it.excerpt || '').trim();
+    const img = (it.image || '').trim();
 
-    // Neueste zuerst
-    items.sort((a, b) => {
-      const da = toDate(a.date);
-      const db = toDate(b.date);
-      if (isNaN(da) && isNaN(db)) return 0;
-      if (isNaN(da)) return 1;
-      if (isNaN(db)) return -1;
-      return db - da;
-    });
+    const hasImg = !!img;
+    const mediaClass = hasImg ? 'news-media is-loading' : 'news-media news-media--placeholder';
+    const dataBgAttr = hasImg ? ` data-bg="${img.replace(/"/g, '&quot;')}"` : '';
+    const meta = [source, date].filter(Boolean).join(' • ');
 
-    if(items.length === 0){
-      grid.innerHTML = '';
-      if(emptyHint) emptyHint.style.display = 'block';
-      return;
-    }
-
-    grid.innerHTML = items.map((it) => {
-      const title = (it.title || 'Artikel').trim();
-      const url = (it.url || '#').trim();
-      const source = (it.source || '').trim();
-      const date = (it.date || '').trim();
-      const excerpt = (it.excerpt || '').trim();
-      const img = (it.image || '').trim();
-
-      // Für Lazy Loading: wir setzen NICHT sofort background-image,
-      // sondern tragen die URL in data-bg ein und markieren .is-loading.
-      // Wenn kein Bild vorhanden: Placeholder behalten, kein Lazy nötig.
-      const hasImg = !!img;
-      const mediaClass = hasImg
-        ? 'news-media is-loading'
-        : 'news-media news-media--placeholder';
-      const dataBgAttr = hasImg ? ` data-bg="${img.replace(/"/g, '&quot;')}"` : '';
-      const meta = [source, date].filter(Boolean).join(' • ');
-
-      return `
-        <article class="news-card" role="listitem">
-          <a href="${url}" target="_blank" rel="noopener" aria-label="Zum Artikel: ${title}">
-            <div class="${mediaClass}"${dataBgAttr}></div>
-          </a>
-          <div class="news-body">
-            <h3 class="news-title">
-              <a href="${url}" target="_blank" rel="noopener">${title}</a>
-            </h3>
-            <p class="news-excerpt">${excerpt || 'Kurzinfo folgt in Kürze.'}</p>
-            <p class="news-meta">${meta || '&nbsp;'}</p>
-            <div class="news-actions">
-              <a href="${url}" target="_blank" rel="noopener">Zum Artikel</a>
-            </div>
+    return `
+      <article class="news-card" role="listitem">
+        <a href="${url}" target="_blank" rel="noopener" aria-label="Zum Artikel: ${title}">
+          <div class="${mediaClass}"${dataBgAttr}></div>
+        </a>
+        <div class="news-body">
+          <h3 class="news-title">
+            <a href="${url}" target="_blank" rel="noopener">${title}</a>
+          </h3>
+          <p class="news-excerpt">${excerpt || 'Kurzinfo folgt in Kürze.'}</p>
+          <p class="news-meta">${meta || '&nbsp;'}</p>
+          <div class="news-actions">
+            <a href="${url}" target="_blank" rel="noopener">Zum Artikel</a>
           </div>
-        </article>
-      `;
-    }).join('');
+        </div>
+      </article>
+    `;
+  }
 
-    // Lazy Loading nach dem Einfügen initialisieren
-    if (io) {
+  function renderChunk(){
+    const end = Math.min(cursor + pageSize, items.length);
+    const slice = items.slice(cursor, end);
+    const html = slice.map(cardHTML).join('');
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    // Elemente einfügen und ggf. für Lazy Loading beobachten
+    while (temp.firstChild){
+      const node = temp.firstChild;
+      grid.appendChild(node);
+      temp.removeChild(node);
+    }
+    if (io){
       grid.querySelectorAll('.news-media.is-loading[data-bg]').forEach(el => io.observe(el));
-    } else {
-      // Fallback ohne IntersectionObserver: sofort laden
+    }else{
       grid.querySelectorAll('.news-media.is-loading[data-bg]').forEach(el => {
         const bg = el.getAttribute('data-bg');
         if (bg) {
@@ -168,10 +155,90 @@
         }
       });
     }
-
-    if(emptyHint) emptyHint.style.display = 'none';
-  }catch(err){
-    console.error('[presse] Fehler:', err);
-    // Platzhalter bleibt stehen
+    cursor = end;
+    // Button-Visibility
+    if (cursor >= items.length){
+      if (moreBtn) moreBtn.style.display = 'none';
+    } else {
+      if (moreBtn) moreBtn.style.display = 'inline-block';
+    }
   }
+
+  async function init(){
+    try{
+      const res = await fetch('data/presse.json?' + Date.now(), { cache: 'no-store' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const list = await res.json();
+      items = Array.isArray(list) ? list.slice() : [];
+      // sort: newest first
+      items.sort((a,b) => {
+        const da = toDate(a.date), db = toDate(b.date);
+        if (isNaN(da) && isNaN(db)) return 0;
+        if (isNaN(da)) return 1;
+        if (isNaN(db)) return -1;
+        return db - da;
+      });
+
+      grid.innerHTML = '';
+      if(items.length === 0){
+        if (emptyHint) emptyHint.style.display = 'block';
+        if (moreBtn) moreBtn.style.display = 'none';
+        return;
+      }
+      renderChunk();
+      if (moreBtn) moreBtn.addEventListener('click', renderChunk);
+    }catch(err){
+      console.error('[presse] Fehler:', err);
+      // Platzhalter bleibt stehen
+    }
+  }
+  init();
+})();
+
+/* ========== KONTAKT: Live-Zeichenzähler + mailto-Versand ========== */
+(function(){
+  const form = document.getElementById('contact-form');
+  if(!form) return;
+
+  const msg = form.querySelector('#message');
+  const cnt = form.querySelector('#msg-count');
+
+  function updateCount(){
+    if(!msg || !cnt) return;
+    cnt.textContent = String(msg.value.length);
+  }
+  msg && msg.addEventListener('input', updateCount);
+  updateCount();
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(form);
+    const subject = (f.get('subject') || '').toString().trim();
+    const name = (f.get('name') || '').toString().trim();
+    const email = (f.get('email') || '').toString().trim();
+    const phone = (f.get('phone') || '').toString().trim();
+    const message = (f.get('message') || '').toString().trim();
+
+    if (!subject || !name || !email || !message){
+      alert('Bitte Betreff, Name, E-Mail und Nachricht ausfüllen.');
+      return;
+    }
+    // very simple email check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      alert('Bitte eine gültige E-Mail-Adresse angeben.');
+      return;
+    }
+
+    // Mailto: Zieladresse hier eintragen:
+    const to = '[KONTAKT-EMAIL-EINFÜGEN]';
+    const bodyLines = [
+      `Name: ${name}`,
+      `E-Mail: ${email}`,
+      phone ? `Telefon: ${phone}` : '',
+      '',
+      message
+    ].filter(Boolean);
+    const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+    window.location.href = mailto;
+  });
 })();
