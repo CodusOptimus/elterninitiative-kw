@@ -195,7 +195,7 @@
   init();
 })();
 
-/* ========== KONTAKT: Live-Zeichenzähler + mailto-Versand ========== */
+/* ========== KONTAKT: Live-Zeichenzähler + mailto-Versand + Bestätigung ========== */
 (function(){
   const form = document.getElementById('contact-form');
   if(!form) return;
@@ -209,6 +209,39 @@
   }
   msg && msg.addEventListener('input', updateCount);
   updateCount();
+
+  // Hilfsfunktion: Info-Box einfügen (schließbar, auto-hide)
+  function showInfo(message){
+    // Falls schon vorhanden, erst entfernen
+    const old = form.querySelector('.note[data-kind="contact-info"]');
+    if (old) old.remove();
+
+    const box = document.createElement('div');
+    box.className = 'note';
+    box.setAttribute('role', 'status');
+    box.setAttribute('aria-live', 'polite');
+    box.setAttribute('data-kind', 'contact-info');
+    box.style.display = 'flex';
+    box.style.justifyContent = 'space-between';
+    box.style.alignItems = 'center';
+    box.style.gap = '.8rem';
+    box.innerHTML = `
+      <span>${message}</span>
+      <button type="button" aria-label="Hinweis schließen" style="border:none;background:transparent;cursor:pointer;font-weight:700;">×</button>
+    `;
+    // Oben im Formular einfügen
+    form.insertBefore(box, form.firstChild);
+
+    const closeBtn = box.querySelector('button');
+    closeBtn.addEventListener('click', () => box.remove());
+
+    // automatisch ausblenden
+    setTimeout(() => {
+      box.style.transition = 'opacity .3s ease';
+      box.style.opacity = '0';
+      setTimeout(() => box.remove(), 350);
+    }, 6000);
+  }
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -229,7 +262,6 @@
       return;
     }
 
-    // Mailto: Zieladresse hier eintragen:
     const to = '[KONTAKT-EMAIL-EINFÜGEN]';
     const bodyLines = [
       `Name: ${name}`,
@@ -239,6 +271,11 @@
       message
     ].filter(Boolean);
     const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+
+    // Bestätigungsbox sofort anzeigen (falls Popup-Blocker o.ä. greift, hat der User trotzdem Feedback)
+    showInfo('Deine E-Mail wurde vorbereitet. Falls sich kein E-Mail-Fenster öffnet, prüfe bitte deinen Browser oder E-Mail-Client.');
+
+    // mailto öffnen
     window.location.href = mailto;
   });
 })();
