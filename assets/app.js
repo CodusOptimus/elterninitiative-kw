@@ -62,7 +62,7 @@
   }
 })();
 
-/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ (mit Logo-Erkennung) ========== */
+/* ========== PRESSE: Laden, Sortieren, Lazy Loading + „Mehr laden“ (mit Logo-Heuristik) ========== */
 (function(){
   const grid = document.getElementById('news-grid');
   const emptyHint = document.getElementById('news-empty');
@@ -96,7 +96,6 @@
       }, { root: null, rootMargin: '200px 0px', threshold: 0.1 })
     : null;
 
-  // Heuristik: Ist das Bild eher ein Logo/Icon?
   function isLogoLike(url){
     return /wikipedia|wikimedia|logo|\.svg(\?|$)|rbb24|ardmediathek/i.test(url || '');
   }
@@ -233,6 +232,99 @@
     }
   }
   init();
+})();
+
+/* ========== BEWERBUNG ELTERNBEIRAT: Mailto + Copy-Buttons aus data/bewerbung.json ========== */
+(async function(){
+  const root = document.getElementById('bewerbung');
+  if(!root) return;
+
+  const cta = document.getElementById('bewerbung-cta');
+  const addrSrc = root.querySelector('#bew-addr .copy-source');
+  const subjSrc = root.querySelector('#bew-subj .copy-source');
+  const bodySrc = root.querySelector('#bew-body .copy-source');
+
+  function updateUI(to, subject, bodyLines){
+    const bodyText = Array.isArray(bodyLines) ? bodyLines.join('\n') : String(bodyLines || '');
+    if (addrSrc) addrSrc.textContent = to || '';
+    if (subjSrc) subjSrc.textContent = subject || '';
+    if (bodySrc) bodySrc.textContent = bodyText || '';
+
+    function buildMailto(){
+      return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+    }
+    if (cta){
+      cta.href = '#';
+      cta.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = buildMailto();
+        try { window.location.href = url; } catch(_) {}
+        setTimeout(() => {
+          try{
+            const a = document.createElement('a');
+            a.href = url; a.style.display = 'none';
+            document.body.appendChild(a); a.click(); a.remove();
+          }catch(_){}
+        }, 150);
+      });
+    }
+
+    // Optional: Auto-Open, wenn gezielt verlinkt
+    try{
+      const hash = (location.hash || '').toLowerCase();
+      const qs = new URLSearchParams(location.search);
+      const wantsAuto = hash.includes('#bewerbung') && (qs.get('auto') === '1' || hash.includes('auto=1'));
+      if (wantsAuto && cta){
+        setTimeout(() => cta.click(), 300);
+      }
+    }catch(_){}
+  }
+
+  try{
+    const res = await fetch('data/bewerbung.json?' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    updateUI(data.to || '', data.subject || '', data.body || '');
+  }catch(err){
+    console.error('[bewerbung] Daten konnten nicht geladen werden:', err);
+    // Fallback auf sinnvolle Defaults, damit die Section trotzdem nutzbar bleibt
+    updateUI(
+      'buergermeisterin@stadt-kw.de',
+      'Bewerbung als Mitglied des Elternbeirats der Stadt Königs Wusterhausen',
+      [
+        'Sehr geehrte Frau Bürgermeisterin,',
+        '',
+        'gemäß § 12 Abs. 3 der Hauptsatzung der Stadt Königs Wusterhausen bewerbe ich mich hiermit als Mitglied des Elternbeirats.',
+        '',
+        'Ich möchte mich aktiv an der Vertretung der Interessen der Kinder und Familien in unserer Stadt beteiligen und einen Beitrag zu einer konstruktiven Zusammenarbeit zwischen Eltern, Einrichtungen und Verwaltung leisten.',
+        '',
+        'Mit freundlichen Grüßen',
+        '[Name]',
+        '[Kind] | [Einrichtung]',
+        '[Telefonnummer] | [Anschrift]'
+      ]
+    );
+  }
+
+  // Delegierter Copy-Handler
+  root.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    const sel = btn.getAttribute('data-copy');
+    if (!sel) return;
+    const src = root.querySelector(sel);
+    if (!src) return;
+    const text = src.innerText.trim();
+    try{
+      await navigator.clipboard.writeText(text);
+      const old = btn.textContent;
+      btn.textContent = 'Kopiert';
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1200);
+    }catch(err){
+      console.error('[bewerbung] Copy fehlgeschlagen', err);
+    }
+  });
 })();
 
 /* ========== KONTAKT: Nur Zeichenzähler (kein Versand) ========== */
