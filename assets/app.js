@@ -136,7 +136,6 @@
     const html = slice.map(cardHTML).join('');
     const temp = document.createElement('div');
     temp.innerHTML = html;
-    // Elemente einfügen und ggf. für Lazy Loading beobachten
     while (temp.firstChild){
       const node = temp.firstChild;
       grid.appendChild(node);
@@ -156,7 +155,6 @@
       });
     }
     cursor = end;
-    // Button-Visibility
     if (cursor >= items.length){
       if (moreBtn) moreBtn.style.display = 'none';
     } else {
@@ -170,7 +168,6 @@
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const list = await res.json();
       items = Array.isArray(list) ? list.slice() : [];
-      // sort: newest first
       items.sort((a,b) => {
         const da = toDate(a.date), db = toDate(b.date);
         if (isNaN(da) && isNaN(db)) return 0;
@@ -189,19 +186,30 @@
       if (moreBtn) moreBtn.addEventListener('click', renderChunk);
     }catch(err){
       console.error('[presse] Fehler:', err);
-      // Platzhalter bleibt stehen
     }
   }
   init();
 })();
 
-/* ========== KONTAKT: Live-Zeichenzähler + mailto-Versand + Bestätigung ========== */
+/* ========== KONTAKT: Zeichenzähler + Fetch-Submit (ohne Mailprogramm) ========== */
 (function(){
   const form = document.getElementById('contact-form');
   if(!form) return;
 
   const msg = form.querySelector('#message');
   const cnt = form.querySelector('#msg-count');
+
+  // === Einstellungen ===
+  // Trage hier deinen Formular-Endpoint ein (z. B. Formspree, Getform, Basin):
+  const FORM_ENDPOINT = '[FORM_ENDPOINT_URL]';  // z.B. https://formspree.io/f/abcd1234
+  const FIELD_MAP = {
+    subject: 'subject',
+    name:    'name',
+    email:   'email',
+    phone:   'phone',
+    message: 'message'
+  };
+  const TIMEOUT_MS = 15000;
 
   function updateCount(){
     if(!msg || !cnt) return;
@@ -210,12 +218,10 @@
   msg && msg.addEventListener('input', updateCount);
   updateCount();
 
-  // Hilfsfunktion: Info-Box einfügen (schließbar, auto-hide)
-  function showInfo(message){
-    // Falls schon vorhanden, erst entfernen
+  // Info-Box (schließbar, auto-hide)
+  function showInfo(message, kind='info'){
     const old = form.querySelector('.note[data-kind="contact-info"]');
     if (old) old.remove();
-
     const box = document.createElement('div');
     box.className = 'note';
     box.setAttribute('role', 'status');
@@ -225,57 +231,131 @@
     box.style.justifyContent = 'space-between';
     box.style.alignItems = 'center';
     box.style.gap = '.8rem';
+    // Farbnuancen je nach Art
+    if (kind === 'error'){
+      box.style.background = '#ffe8e8';
+      box.style.borderColor = '#ffb3b3';
+      box.style.color = '#7a1f1f';
+    }
     box.innerHTML = `
       <span>${message}</span>
       <button type="button" aria-label="Hinweis schließen" style="border:none;background:transparent;cursor:pointer;font-weight:700;">×</button>
     `;
-    // Oben im Formular einfügen
     form.insertBefore(box, form.firstChild);
-
     const closeBtn = box.querySelector('button');
     closeBtn.addEventListener('click', () => box.remove());
-
-    // automatisch ausblenden
-    setTimeout(() => {
-      box.style.transition = 'opacity .3s ease';
-      box.style.opacity = '0';
-      setTimeout(() => box.remove(), 350);
-    }, 6000);
+    // auto ausblenden nur bei Erfolg/Info
+    if (kind !== 'error') {
+      setTimeout(() => {
+        box.style.transition = 'opacity .3s ease';
+        box.style.opacity = '0';
+        setTimeout(() => box.remove(), 350);
+      }, 6000);
+    }
   }
 
-  form.addEventListener('submit', (e) => {
+  // Honeypot (Spam-Schutz): verstecktes Feld
+  let hp = form.querySelector('input[name="website"]');
+  if (!hp){
+    hp = document.createElement('input');
+    hp.type = 'text';
+    hp.name = 'website';
+    hp.autocomplete = 'off';
+    hp.tabIndex = -1;
+    hp.style.position = 'absolute';
+    hp.style.left = '-5000px';
+    hp.style.top = 'auto';
+    hp.style.width = '1px';
+    hp.style.height = '1px';
+    hp.style.opacity = '0';
+    form.appendChild(hp);
+  }
+
+  // Submit
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Simple Validierung
     const f = new FormData(form);
     const subject = (f.get('subject') || '').toString().trim();
-    const name = (f.get('name') || '').toString().trim();
-    const email = (f.get('email') || '').toString().trim();
-    const phone = (f.get('phone') || '').toString().trim();
+    const name    = (f.get('name')    || '').toString().trim();
+    const email   = (f.get('email')   || '').toString().trim();
+    const phone   = (f.get('phone')   || '').toString().trim();
     const message = (f.get('message') || '').toString().trim();
+    const honey   = (f.get('website') || '').toString().trim(); // Bot?
 
+    if (honey){ // Bot-Feld gefüllt → abbrechen
+      showInfo('Anfrage konnte nicht gesendet werden (Spam-Verdacht).', 'error');
+      return;
+    }
     if (!subject || !name || !email || !message){
-      alert('Bitte Betreff, Name, E-Mail und Nachricht ausfüllen.');
+      showInfo('Bitte Betreff, Name, E-Mail und Nachricht ausfüllen.', 'error');
       return;
     }
-    // very simple email check
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-      alert('Bitte eine gültige E-Mail-Adresse angeben.');
+      showInfo('Bitte eine gültige E-Mail-Adresse angeben.', 'error');
+      return;
+    }
+    if (FORM_ENDPOINT.startsWith('[')){
+      showInfo('Formular ist noch nicht konfiguriert. Bitte Endpoint-URL in assets/app.js setzen.', 'error');
       return;
     }
 
-    const to = '[KONTAKT-EMAIL-EINFÜGEN]';
-    const bodyLines = [
-      `Name: ${name}`,
-      `E-Mail: ${email}`,
-      phone ? `Telefon: ${phone}` : '',
-      '',
-      message
-    ].filter(Boolean);
-    const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+    // Button-Sperre & Ladezustand
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const oldText = submitBtn ? submitBtn.textContent : '';
+    if (submitBtn){
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Senden …';
+    }
 
-    // Bestätigungsbox sofort anzeigen (falls Popup-Blocker o.ä. greift, hat der User trotzdem Feedback)
-    showInfo('Deine E-Mail wurde vorbereitet. Falls sich kein E-Mail-Fenster öffnet, prüfe bitte deinen Browser oder E-Mail-Client.');
+    // Payload: Für Formspree & Co. reicht FormData; JSON geht auch (je nach Anbieter).
+    // Wir senden JSON (sauberer) + Header. Bei Problemen auf FormData umstellen.
+    const payload = {
+      [FIELD_MAP.subject]: subject,
+      [FIELD_MAP.name]:    name,
+      [FIELD_MAP.email]:   email,
+      [FIELD_MAP.phone]:   phone,
+      [FIELD_MAP.message]: message
+    };
 
-    // mailto öffnen
-    window.location.href = mailto;
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    try{
+      const res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+
+      clearTimeout(t);
+
+      if (!res.ok){
+        // Versuch, Fehlermeldung zu lesen
+        let errText = '';
+        try { errText = (await res.text()).slice(0, 300); } catch(_) {}
+        console.error('[contact] HTTP', res.status, errText);
+        showInfo('Senden fehlgeschlagen. Bitte später erneut versuchen.', 'error');
+      } else {
+        showInfo('Danke! Deine Nachricht wurde erfolgreich übermittelt.');
+        form.reset();
+        updateCount();
+      }
+    } catch(err){
+      clearTimeout(t);
+      console.error('[contact] Fehler:', err);
+      const aborted = err && (err.name === 'AbortError');
+      showInfo(aborted ? 'Zeitüberschreitung beim Senden. Bitte erneut versuchen.' : 'Unerwarteter Fehler beim Senden.', 'error');
+    } finally {
+      if (submitBtn){
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldText;
+      }
+    }
   });
 })();
