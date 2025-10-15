@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bewerbung Elternbeirat · Elterninitiative KW</title>
+  <meta name="description" content="Bewerbung für den Elternbeirat – Elterninitiative Königs Wusterhausen.">
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <a class="sr-only" href="#content">Zum Inhalt springen</a>
+
+  <header class="hero">
+    <div class="container">
+      <span class="badge">Mitmachen</span>
+      <h1>Bewerbung für den Elternbeirat</h1>
+      <p class="lead">Du wirst gleich weitergeleitet. Falls nicht, nutze den Button unten.</p>
+    </div>
+  </header>
+
+  <div class="nav">
+    <div class="row container">
+      <a href="index.html#mitmachen">Zurück</a>
+      <a href="index.html#termine">Termine</a>
+      <a href="index.html#presse">Presse</a>
+      <a href="index.html#kontakt">Kontakt</a>
+    </div>
+  </div>
+
+  <main id="content" class="container">
+    <section>
+      <h2>Weiterleitung</h2>
+      <p>Wir leiten dich zur Bewerbungsseite weiter. Deine eingegebenen Daten bleiben unverändert erhalten.</p>
+      <p><a id="go" class="btn-neutral" href="#">Jetzt weiter</a></p>
+    </section>
+  </main>
+
+  <footer>
+    © Elterninitiative Königs Wusterhausen · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a>
+  </footer>
+
+  <script>
+    (function(){
+      const targetBase = '[REDIRECT-ZIEL-URL-EINFÜGEN]'; // z.B. https://elterninitiative-kw.github.io/redirect/
+      const qs = window.location.search || '';
+      const target = targetBase + qs;
+      document.getElementById('go').setAttribute('href', target);
+      // kurze Verzögerung, dann redirect
+      setTimeout(()=>{ window.location.href = target; }, 800);
+    })();
+  </script>
+</body>
+</html>
