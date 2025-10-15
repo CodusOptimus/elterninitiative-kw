@@ -234,7 +234,7 @@
   init();
 })();
 
-/* ========== BEWERBUNG ELTERNBEIRAT: Formular + Kinder add/remove + Mailto/Vorschau ========== */
+/* ========== BEWERBUNG ELTERNBEIRAT: Formular + Kinder add/remove + Mailto/Vorschau (stabil) ========== */
 (async function(){
   const root = document.getElementById('bewerbung');
   if(!root) return;
@@ -244,17 +244,23 @@
   const firstEl = document.getElementById('bf-firstname');
   const lastEl  = document.getElementById('bf-lastname');
   const phoneEl = document.getElementById('bf-phone');
-  const addrEl  = document.getElementById('bf-address');
-  const kidsWrap = document.getElementById('kids-list');
-  const addKidBtn = document.getElementById('add-kid');
-  const cta = document.getElementById('bewerbung-cta');
+
+  // Adressfelder
+  const streetEl  = document.getElementById('bf-street');
+  const housenoEl = document.getElementById('bf-houseno');
+  const zipEl     = document.getElementById('bf-zip');
+  const cityEl    = document.getElementById('bf-city');
+
+  const kidsWrap   = document.getElementById('kids-list');
+  const addKidBtn  = document.getElementById('add-kid');
+  const cta        = document.getElementById('bewerbung-cta');
   const refreshBtn = document.getElementById('refresh-preview');
 
   const addrSrc = root.querySelector('#bew-addr .copy-source');
   const subjSrc = root.querySelector('#bew-subj .copy-source');
   const bodySrc = root.querySelector('#bew-body .copy-source');
 
-  // Konfiguration laden
+  // Konfiguration aus JSON laden
   let CFG = {
     to: 'buergermeisterin@stadt-kw.de',
     subject: 'Bewerbung als Mitglied des Elternbeirats der Stadt Königs Wusterhausen',
@@ -268,7 +274,6 @@
     ],
     closing: ['Mit freundlichen Grüßen','[VORNAME] [NACHNAME]']
   };
-
   try{
     const res = await fetch('data/bewerbung.json?' + Date.now(), { cache: 'no-store' });
     if (res.ok){
@@ -280,13 +285,10 @@
         closing: Array.isArray(data.closing) ? data.closing : CFG.closing
       };
     }
-  }catch(err){
-    console.warn('[bewerbung] Verwende Default-Konfig (Ladefehler).', err);
-  }
+  }catch(_){ /* bleibt bei Defaults */ }
 
   // Hilfsfunktionen
   function kidRow(name='', inst=''){
-    const id = 'kid-' + Math.random().toString(36).slice(2,8);
     const row = document.createElement('div');
     row.className = 'kid-row';
     row.innerHTML = `
@@ -306,21 +308,14 @@
     `;
     return row;
   }
-
   function ensureAtLeastOneKid(){
-    if (!kidsWrap.querySelector('.kid-row')){
-      kidsWrap.appendChild(kidRow());
-    }
+    if (!kidsWrap.querySelector('.kid-row')) kidsWrap.appendChild(kidRow());
     updateRemoveButtons();
   }
-
   function updateRemoveButtons(){
     const rows = kidsWrap.querySelectorAll('.kid-row');
-    kidsWrap.querySelectorAll('.kid-remove').forEach(btn => {
-      btn.disabled = (rows.length <= 1);
-    });
+    kidsWrap.querySelectorAll('.kid-remove').forEach(btn => { btn.disabled = (rows.length <= 1); });
   }
-
   function readKids(){
     const rows = Array.from(kidsWrap.querySelectorAll('.kid-row'));
     return rows.map(r => ({
@@ -329,47 +324,53 @@
     })).filter(k => k.name || k.inst);
   }
 
-  function buildBody(){
+  // Body mit CRLF erzeugen (bessere Kompatibilität)
+  function buildBodyCRLF(){
     const first = (firstEl.value || '').trim();
     const last  = (lastEl.value || '').trim();
     const phone = (phoneEl.value || '').trim();
-    const addr  = (addrEl.value || '').trim();
-    const kids  = readKids().filter(k => k.name && k.inst);
 
-    // Intro
+    const street  = (streetEl.value  || '').trim();
+    const houseno = (housenoEl.value || '').trim();
+    const zip     = (zipEl.value     || '').trim();
+    const city    = (cityEl.value    || '').trim();
+
+    const addrLine1 = [street, houseno].filter(Boolean).join(' ');
+    const addrLine2 = [zip, city].filter(Boolean).join(' ');
+    const addrFull  = [addrLine1, addrLine2].filter(Boolean).join(', ');
+
+    const kids = readKids().filter(k => k.name && k.inst);
+
     const lines = [...CFG.intro];
 
-    // Kinder-Liste
     if (kids.length){
       lines.push('Meine Kinder:');
-      kids.forEach(k => {
-        lines.push(`• ${k.name} | ${k.inst}`);
-      });
+      kids.forEach(k => lines.push(`• ${k.name} | ${k.inst}`));
       lines.push('');
     }
 
-    // Kontaktdaten
     const contact = [];
-    if (first || last) contact.push(`${first} ${last}`.trim());
-    if (addr) contact.push(addr);
-    if (phone) contact.push(phone);
+    const fullName = [first, last].filter(Boolean).join(' ');
+    if (fullName) contact.push(fullName);
+    if (addrFull) contact.push(addrFull);
+    if (phone)    contact.push(phone);
     if (contact.length){
       lines.push('Kontaktdaten:');
       contact.forEach(c => lines.push(c));
       lines.push('');
     }
 
-    // Closing (mit Namen ersetzt)
     const closing = CFG.closing.map(l =>
       l.replace('[VORNAME]', first || '').replace('[NACHNAME]', last || '')
     );
     lines.push(...closing);
 
-    return lines.join('\n');
+    // CRLF
+    return lines.join('\r\n');
   }
 
   function buildMailto(){
-    const body = buildBody();
+    const body = buildBodyCRLF();
     return `mailto:${CFG.to}?subject=${encodeURIComponent(CFG.subject)}&body=${encodeURIComponent(body)}`;
   }
 
@@ -380,20 +381,30 @@
     return !!(first && last && validKids.length >= 1);
   }
 
-  function renderPreview(){
-    // Ziel/Betreff
-    if (addrSrc) addrSrc.textContent = CFG.to || '';
-    if (subjSrc) subjSrc.textContent = CFG.subject || '';
-    // Body
-    if (bodySrc) bodySrc.textContent = buildBody();
+  function renderPreviewAndLink(){
+    // Vorschau
+    addrSrc && (addrSrc.textContent = CFG.to || '');
+    subjSrc && (subjSrc.textContent = CFG.subject || '');
+    bodySrc && (bodySrc.textContent = buildBodyCRLF());
+
+    // Mailto-HREF setzen (wichtig!)
+    if (cta){
+      cta.setAttribute('href', buildMailto());
+      // ARIA-Hinweis für (de)aktiv
+      cta.setAttribute('aria-disabled', validateMinimal() ? 'false' : 'true');
+      cta.title = validateMinimal()
+        ? 'E-Mail in deinem Mailprogramm öffnen'
+        : 'Bitte Vorname, Nachname und mind. ein Kind mit Einrichtung angeben';
+    }
   }
 
-  // Initiale Kinderzeile und Events
+  // Init
   ensureAtLeastOneKid();
-  addKidBtn?.addEventListener('click', () => {
+  addKidBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
     kidsWrap.appendChild(kidRow());
     updateRemoveButtons();
-    renderPreview();
+    renderPreviewAndLink();
   });
   kidsWrap.addEventListener('click', (e) => {
     const btn = e.target.closest('.kid-remove');
@@ -402,59 +413,30 @@
     if (rows.length > 1){
       btn.closest('.kid-row')?.remove();
       updateRemoveButtons();
-      renderPreview();
+      renderPreviewAndLink();
     }
   });
 
-  // Live-Update bei Eingaben
-  [firstEl, lastEl, phoneEl, addrEl].forEach(el => {
-    el?.addEventListener('input', renderPreview);
+  // Live-Update
+  [firstEl, lastEl, phoneEl, streetEl, housenoEl, zipEl, cityEl].forEach(el => {
+    el?.addEventListener('input', renderPreviewAndLink);
   });
-  kidsWrap.addEventListener('input', renderPreview);
-  refreshBtn?.addEventListener('click', (e) => { e.preventDefault(); renderPreview(); });
+  kidsWrap.addEventListener('input', renderPreviewAndLink);
+  refreshBtn?.addEventListener('click', (e)=>{ e.preventDefault(); renderPreviewAndLink(); });
 
-  // CTA → E-Mail öffnen (mit Minimal-Validierung)
+  // Klick: nur blocken, wenn ungültig – sonst Browser nativ navigieren lassen
   cta?.addEventListener('click', (e) => {
-    e.preventDefault();
     if (!validateMinimal()){
+      e.preventDefault();
       alert('Bitte Vorname, Nachname sowie mindestens ein Kind mit Einrichtung angeben.');
-      return;
     }
-    const url = buildMailto();
-    try { window.location.href = url; } catch(_) {}
-    setTimeout(() => {
-      try{
-        const a = document.createElement('a');
-        a.href = url; a.style.display = 'none';
-        document.body.appendChild(a); a.click(); a.remove();
-      }catch(_){}
-    }, 150);
+    // kein window.location, kein künstlicher Klick – native mailto-Navigation!
   });
 
-  // Copy-Buttons (delegiert)
-  root.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.copy-btn');
-    if (!btn) return;
-    const sel = btn.getAttribute('data-copy');
-    if (!sel) return;
-    const src = root.querySelector(sel);
-    if (!src) return;
-    const text = src.innerText.trim();
-    try{
-      await navigator.clipboard.writeText(text);
-      const old = btn.textContent;
-      btn.textContent = 'Kopiert';
-      btn.disabled = true;
-      setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1200);
-    }catch(err){
-      console.error('[bewerbung] Copy fehlgeschlagen', err);
-    }
-  });
+  // Erste Vorschau+Link
+  renderPreviewAndLink();
 
-  // Erste Vorschau nach Laden
-  renderPreview();
-
-  // Optionales Auto-Open, wenn gültig
+  // Optional Auto-Open, nur wenn gültig
   try{
     const hash = (location.hash || '').toLowerCase();
     const qs = new URLSearchParams(location.search);
