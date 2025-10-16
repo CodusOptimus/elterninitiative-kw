@@ -2,199 +2,273 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  <meta name="description" content="Elterninitiative KW – Transparenz, Termine & Engagement für faire Elternbeiträge in Königs Wusterhausen." />
   <title>Elterninitiative KW – Transparenz, Termine & Engagement</title>
-  <meta name="description" content="Elterninitiative KW: Termine, Informationen und Presse rund um faire Elternbeiträge in Königs Wusterhausen." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Elterninitiative KW – Transparenz, Termine & Engagement">
+  <meta property="og:description" content="Wir setzen uns für faire und planbare Elternbeiträge in KW ein. Termine, Presse, Mitmachen.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
-  <header class="hero">
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+  <header class="hero" role="banner">
     <div class="container">
       <span class="badge">Elterninitiative KW</span>
       <h1>Transparenz, Termine &amp; Engagement</h1>
-      <p class="lead">Für faire und planbare Elternbeiträge in Krippe, Kita und Hort. Hier findest du aktuelle Sitzungen, Pressebeiträge sowie Wege, dich einzubringen.</p>
-      <div class="cta-row">
-        <a href="#termine" class="btn btn-primary">Sitzungen & Termine</a>
-        <a href="#presse" class="btn btn-ghost">Presse & Veröffentlichungen</a>
-        <a href="#bewerbung" class="btn btn-ghost">Bewerbung Elternbeirat</a>
+      <p class="lead">Wir setzen uns für faire und planbare Elternbeiträge in Krippe, Kita und Hort in Königs Wusterhausen ein.</p>
+      <div class="cta-row" role="navigation" aria-label="Schnellzugriff">
+        <a class="btn btn-primary" href="#termine">Sitzungen & Termine</a>
+        <a class="btn btn-ghost" href="#presse">Presse & Veröffentlichungen</a>
+        <a class="btn btn-ghost" href="#mitmachen">Mitmachen</a>
       </div>
-      <div class="hero-card">
-        <p><strong>Hinweis:</strong> Termine werden automatisch geladen. Pressebeiträge pflegst du in <code>data/presse.json</code>. Die Bewerbung für den Elternbeirat erstellst du direkt hier auf der Seite.</p>
+      <div class="hero-card" aria-live="polite">
+        <p><strong>Aktuell:</strong> Petition mit knapp 1.500 Unterschriften am 13.10.2025 im Rahmen der SVV übergeben.</p>
       </div>
     </div>
   </header>
 
-  <nav class="nav">
+  <nav class="nav" aria-label="Hauptnavigation">
     <div class="container">
       <div class="row">
+        <a href="#ueber-uns">Über uns</a>
+        <a href="#news">Aktuelles</a>
         <a href="#termine">Termine</a>
         <a href="#presse">Presse</a>
-        <a href="#bewerbung">Bewerbung Elternbeirat</a>
+        <a href="#petition">Petition</a>
+        <a href="#mitmachen">Mitmachen</a>
+        <a href="#downloads">Downloads</a>
+        <a href="#bewerbung">Bewerbung</a>
         <a href="#kontakt">Kontakt</a>
+        <a href="#recht">Rechtliches</a>
       </div>
     </div>
   </nav>
 
-  <main class="container">
+  <main id="main" class="container">
+
+    <!-- Über uns -->
+    <section id="ueber-uns" aria-labelledby="h-ueber-uns">
+      <h2 id="h-ueber-uns">Über uns</h2>
+      <p class="lead">Wir sind engagierte Eltern aus Königs Wusterhausen. Unser Ziel: faire, nachvollziehbare und sozial ausgewogene Elternbeiträge – transparent erarbeitet und rechtssicher beschlossen.</p>
+      <div class="note">
+        <p>Wir arbeiten überparteilich, konstruktiv und im Dialog mit Stadt, Trägern und Elternvertretungen.</p>
+      </div>
+    </section>
+
+    <!-- Aktuelles (eigene News) -->
+    <section id="news" aria-labelledby="h-news">
+      <h2 id="h-news">Aktuelles</h2>
+      <p class="meta">Neuigkeiten der Elterninitiative – unsere eigenen Updates und Kurzberichte.</p>
+      <div id="blog-empty" class="note" style="display:none">Derzeit keine Neuigkeiten.</div>
+      <div id="blog-grid" class="news-grid" role="list" aria-busy="true"></div>
+      <div class="news-more-wrap">
+        <button id="blog-more" class="btn-neutral" style="display:none">Mehr laden</button>
+      </div>
+    </section>
 
     <!-- Termine -->
-    <section id="termine">
-      <h2>Kommende Sitzungen und Termine</h2>
-      <p class="meta">Automatisch aus SessionNet geladen (Sitzungen der SVV & relevanter Ausschüsse).</p>
-      <div id="events" class="events" role="list"></div>
-      <div class="note">Bei Abweichungen gelten die Angaben der Stadt.</div>
+    <section id="termine" aria-labelledby="h-termine">
+      <h2 id="h-termine">Kommende Sitzungen & Termine</h2>
+      <p class="meta">Relevante Sitzungen (z. B. SVV, Hauptausschuss, Sozialausschuss). Quelle: SessionNet.</p>
+      <div id="events" class="events" role="list" aria-busy="true"></div>
+      <div class="note">Bei Abweichungen gelten die offiziellen Angaben der Stadt.</div>
     </section>
 
     <!-- Presse -->
-    <section id="presse">
-      <h2>Presse & Veröffentlichungen</h2>
-      <p class="meta">Aktuelle Beiträge und Berichte – gepflegt in <code>data/presse.json</code>, neueste zuerst.</p>
+    <section id="presse" aria-labelledby="h-presse">
+      <h2 id="h-presse">Presse & Veröffentlichungen</h2>
       <div id="news-empty" class="note" style="display:none">Derzeit liegen keine Pressebeiträge vor.</div>
-      <div id="news-grid" class="news-grid" role="list"></div>
+      <div id="news-grid" class="news-grid" role="list" aria-busy="true"></div>
       <div class="news-more-wrap">
         <button id="news-more" class="btn-neutral" style="display:none">Mehr laden</button>
       </div>
     </section>
 
-    <!-- Bewerbung Elternbeirat -->
-    <section id="bewerbung">
-      <h2>Bewerbung als Mitglied des Elternbeirats</h2>
-      <p class="meta">Gib deine Daten ein, ergänze ggf. mehrere Kinder und öffne dann die vorformulierte E-Mail.</p>
-    
+    <!-- Petition -->
+    <section id="petition" aria-labelledby="h-petition">
+      <h2 id="h-petition">Petition</h2>
+      <p class="meta">openPetition – <strong>beendet</strong>. Übergabe am 13.10.2025 im Rahmen der SVV an Bürgermeisterin und SVV-Vorsitzende.</p>
       <div class="note">
-        Deine Angaben werden nur lokal im Browser verarbeitet und nicht gespeichert. Felder mit * sind Pflicht.
+        <p>Die Petition erreichte knapp 1.500 Unterschriften. Vielen Dank an alle Unterstützerinnen und Unterstützer!</p>
+        <p><a id="link-petition" class="btn-neutral" href="#" target="_blank" rel="noopener noreferrer">Petition ansehen</a></p>
       </div>
-    
+    </section>
+
+    <!-- Mitmachen -->
+    <section id="mitmachen" aria-labelledby="h-mitmachen">
+      <h2 id="h-mitmachen">Mitmachen & Vernetzen</h2>
+      <p class="meta">Bleib auf dem Laufenden und vernetze dich mit anderen Eltern.</p>
+      <div class="cta-row">
+        <a id="link-whatsapp" class="btn-neutral" href="#" target="_blank" rel="noopener noreferrer">WhatsApp-Gruppe</a>
+        <a id="link-newsletter" class="btn-neutral" href="#" target="_blank" rel="noopener noreferrer">Newsletter</a>
+        <a id="link-info" class="btn-neutral" href="#" target="_blank" rel="noopener noreferrer">Infos & FAQ</a>
+      </div>
+    </section>
+
+    <!-- Downloads -->
+    <section id="downloads" aria-labelledby="h-downloads">
+      <h2 id="h-downloads">Downloads & Dokumente</h2>
+      <div id="dl-list" class="downloads" role="list" aria-busy="true"></div>
+      <div class="note">Hier findest du Satzungen, Vorlagen, Stellungnahmen und weitere Unterlagen.</div>
+    </section>
+
+    <!-- Bewerbung -->
+    <section id="bewerbung" aria-labelledby="h-bewerbung">
+      <h2 id="h-bewerbung">Bewerbung als Mitglied des Elternbeirats</h2>
+      <p class="meta">Fülle das Formular aus, ergänze ggf. mehrere Kinder und öffne die vorformulierte E-Mail.</p>
+      <div class="note">Deine Angaben werden nur lokal im Browser verarbeitet und nicht gespeichert. Felder mit * sind Pflicht.</div>
+
       <form id="bewerbung-form" class="contact-form" novalidate>
         <div class="grid-2">
           <label>
             <span>Vorname *</span>
-            <input type="text" id="bf-firstname" placeholder="Vorname" required>
+            <input type="text" id="bf-firstname" required autocomplete="given-name">
           </label>
           <label>
             <span>Nachname *</span>
-            <input type="text" id="bf-lastname" placeholder="Nachname" required>
+            <input type="text" id="bf-lastname" required autocomplete="family-name">
           </label>
           <label>
-            <span>Telefonnummer</span>
-            <input type="tel" id="bf-phone" placeholder="+49 …">
+            <span>Telefon</span>
+            <input type="tel" id="bf-phone" autocomplete="tel">
           </label>
         </div>
-    
-        <!-- Anschrift in Einzelteilen (alle Pflicht) -->
+
         <div class="grid-2">
           <label>
             <span>Straße *</span>
-            <input type="text" id="bf-street" placeholder="Straßenname" required>
+            <input type="text" id="bf-street" required autocomplete="address-line1">
           </label>
           <label>
             <span>Hausnummer *</span>
-            <input type="text" id="bf-houseno" placeholder="Nr." required>
+            <input type="text" id="bf-houseno" required inputmode="text">
           </label>
           <label>
             <span>Postleitzahl *</span>
-            <input type="text" id="bf-zip" inputmode="numeric" pattern="[0-9]{5}" placeholder="z. B. 15711" required>
+            <input type="text" id="bf-zip" required pattern="[0-9]{5}" inputmode="numeric" autocomplete="postal-code">
           </label>
           <label>
             <span>Ort *</span>
-            <input type="text" id="bf-city" placeholder="z. B. Königs Wusterhausen" required>
+            <input type="text" id="bf-city" required autocomplete="address-level2">
           </label>
         </div>
-    
+
         <div class="kids-head">
           <strong>Kinder (mindestens 1)</strong>
-          <button type="button" id="add-kid" class="btn-neutral" style="margin-left:.6rem">Kind hinzufügen</button>
+          <button type="button" id="add-kid" class="btn-neutral">Kind hinzufügen</button>
         </div>
-    
-        <div id="kids-list" class="kids-list">
-          <!-- dynamische Kind-Zeilen: Vorname*, Nachname*, Einrichtung* -->
-        </div>
-    
-        <div class="actions" style="margin-top:.8rem">
-          <a id="bewerbung-cta" class="btn-neutral" href="#">Bewerbung per E-Mail öffnen</a>
+        <div id="kids-list" class="kids-list"></div>
+
+        <div class="actions">
+          <a id="bewerbung-cta" class="btn-neutral" href="#" aria-disabled="true">Bewerbung per E-Mail öffnen</a>
           <button type="button" id="refresh-preview" class="btn-neutral">Vorschau aktualisieren</button>
         </div>
       </form>
-    
+
       <div class="copy-grid" style="margin-top:1rem">
-        <!-- Adresse -->
         <div class="copy-card" id="bew-addr">
           <div class="copy-label">E-Mail-Adresse</div>
           <div class="copy-box">
-            <button class="copy-btn" data-copy="#bew-addr .copy-source" aria-label="Adresse kopieren" title="Kopieren">Kopieren</button>
+            <button class="copy-btn" data-copy="#bew-addr .copy-source">Kopieren</button>
             <div class="copy-source">lade …</div>
           </div>
         </div>
-        <!-- Betreff -->
         <div class="copy-card" id="bew-subj">
           <div class="copy-label">Betreff</div>
           <div class="copy-box">
-            <button class="copy-btn" data-copy="#bew-subj .copy-source" aria-label="Betreff kopieren" title="Kopieren">Kopieren</button>
+            <button class="copy-btn" data-copy="#bew-subj .copy-source">Kopieren</button>
             <div class="copy-source">lade …</div>
           </div>
         </div>
-        <!-- Nachricht (Vorschau) -->
         <div class="copy-card" id="bew-body">
           <div class="copy-label">E-Mail-Text (Vorschau)</div>
           <div class="copy-box copy-scroll">
-            <button class="copy-btn" data-copy="#bew-body .copy-source" aria-label="Text kopieren" title="Kopieren">Kopieren</button>
-            <div class="copy-source" id="bewerbung-preview">lade …</div>
+            <button class="copy-btn" data-copy="#bew-body .copy-source">Kopieren</button>
+            <pre class="copy-source" id="bewerbung-preview" aria-live="polite"></pre>
           </div>
         </div>
       </div>
-    
-      <div class="note" style="margin-top:.8rem">
-        Optional: Rufe die Seite mit <code>#bewerbung?auto=1</code> auf, um das E-Mail-Fenster automatisch zu öffnen (falls dein Browser das erlaubt).
-      </div>
     </section>
 
-    <!-- Kontakt (nur Zeichenzähler aktiv) -->
-    <section id="kontakt">
-      <h2>Kontakt</h2>
-      <p class="meta">Kurze Nachricht senden. (Der Versanddienst wird später ergänzt.)</p>
+    <!-- Kontakt -->
+    <section id="kontakt" aria-labelledby="h-kontakt">
+      <h2 id="h-kontakt">Kontakt</h2>
+      <p class="meta">Kurze Nachricht senden. (Sobald ein Versand-Endpoint hinterlegt ist, wird das Formular aktiv.)</p>
+
       <form id="contact-form" class="contact-form" novalidate>
         <div class="grid-2">
           <label>
             <span>Betreff *</span>
-            <input type="text" name="subject" placeholder="Worum geht es?" required />
+            <input type="text" name="subject" required>
           </label>
           <label>
             <span>Name *</span>
-            <input type="text" name="name" placeholder="Dein Name" required />
+            <input type="text" name="name" required autocomplete="name">
           </label>
           <label>
             <span>E-Mail *</span>
-            <input type="email" name="email" placeholder="name@example.org" required />
+            <input type="email" name="email" required autocomplete="email">
           </label>
           <label>
             <span>Telefon</span>
-            <input type="tel" name="phone" placeholder="+49 …" />
+            <input type="tel" name="phone" autocomplete="tel">
           </label>
         </div>
         <label>
           <span>Nachricht *</span>
-          <textarea id="message" name="message" maxlength="600" placeholder="Max. 600 Zeichen" required></textarea>
+          <textarea id="message" name="message" maxlength="600" required></textarea>
           <div class="counter"><span id="msg-count">0</span>/600</div>
         </label>
+
+        <!-- Spam-Honeypot + Timestamp -->
+        <input type="text" name="company" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+        <input type="hidden" name="ts" value="">
+
         <div class="actions">
-          <button type="submit" class="btn-neutral" disabled>Senden (bald verfügbar)</button>
-          <span class="form-hint">Der Versand wird zeitnah freigeschaltet.</span>
+          <button type="submit" class="btn-neutral" id="contact-submit" disabled>Senden</button>
+          <span id="contact-hint" class="form-hint">Der Versand wird aktiviert, sobald ein Endpoint in <code>data/links.json</code> hinterlegt ist.</span>
         </div>
       </form>
     </section>
 
+    <!-- Rechtliches -->
+    <section id="recht" aria-labelledby="h-recht">
+      <h2 id="h-recht">Impressum & Datenschutz</h2>
+      <div class="note">
+        <p><strong>Impressum:</strong> <span id="impressum-name">[Verantwortliche Person/Initiative]</span> · <span id="impressum-mail">[E-Mail]</span></p>
+        <p><strong>Datenschutz:</strong> Keine Cookies, kein Tracking. Beim Kontaktformular werden Inhalte zweckgebunden verarbeitet. Details siehe <a href="#" id="link-dse" rel="noopener noreferrer">Datenschutzerklärung</a>.</p>
+      </div>
+    </section>
+
   </main>
 
-  <footer>
+  <footer role="contentinfo">
     <div class="links">
+      <a href="#ueber-uns">Über uns</a> ·
+      <a href="#news">Aktuelles</a> ·
       <a href="#termine">Termine</a> ·
       <a href="#presse">Presse</a> ·
-      <a href="#bewerbung">Bewerbung</a> ·
+      <a href="#mitmachen">Mitmachen</a> ·
       <a href="#kontakt">Kontakt</a>
     </div>
     <p>© Elterninitiative KW</p>
   </footer>
 
   <script src="assets/app.js" defer></script>
+
+  <noscript>
+    <div class="container">
+      <section class="note">
+        <p>Für die dynamischen Inhalte (Termine, Presse, Aktuelles, Bewerbung, Kontakt) ist JavaScript erforderlich.</p>
+      </section>
+    </div>
+  </noscript>
 </body>
 </html>
