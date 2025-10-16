@@ -1,0 +1,10 @@
+{
+  "whatsapp": "__WHATSAPP_URL__",
+  "newsletter": "__NEWSLETTER_URL__",
+  "info": "__INFOSEITE_URL__",
+  "petition": "__OPENPETITION_URL__",
+  "datenschutz": "__DATENSCHUTZ_URL__",
+  "impressum_name": "Elterninitiative KW (Verantwortliche:r)",
+  "impressum_mail": "kontakt@example.org",
+  "contact_endpoint": ""
+}
