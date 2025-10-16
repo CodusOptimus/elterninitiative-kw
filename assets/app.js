@@ -329,29 +329,6 @@ document.addEventListener('click', (e)=>{
   }catch(e){ safeLog('news', e); }
 })();
 
-/* ========= DOWNLOADS: data/downloads.json ========= */
-(async function(){
-  try{
-    const root = document.getElementById('dl-list');
-    if(!root) return;
-    const res = await fetch('data/downloads.json?' + Date.now(), { cache:'no-store' });
-    if(!res.ok){ root.innerHTML = '<div class="note">Keine Dokumente gefunden.</div>'; return; }
-    const items = await res.json();
-    if(!Array.isArray(items) || !items.length){
-      root.innerHTML = '<div class="note">Derzeit keine Dokumente vorhanden.</div>'; return;
-    }
-    root.innerHTML = items.map(d=>{
-      const title = escapeHTML((d.title||'Dokument').trim());
-      const url = safeURL(d.url);
-      const meta = [d.type, d.date, d.size].filter(Boolean).map(escapeHTML).join(' • ');
-      return `<article class="dl-card" role="listitem">
-        <h3 class="dl-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
-        <p class="dl-meta">${meta}</p>
-      </article>`;
-    }).join('');
-  }catch(e){ safeLog('downloads', e); }
-})();
-
 /* ========= BEWERBUNG: Live-Preview + Mailto (CRLF) ========= */
 (function(){
   const root = document.getElementById('bewerbung');
@@ -583,3 +560,32 @@ function initContactCounterOnly(){
   function updateCount(){ if(msg && cnt) cnt.textContent = String(msg.value.length); }
   msg?.addEventListener('input', updateCount); updateCount();
 }
+
+/* ========= „Nach oben“-Button ========= */
+(function(){
+  const btn = document.getElementById('to-top');
+  if(!btn) return;
+
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function onScroll(){
+    const show = window.scrollY > 400;
+    if (show) btn.classList.add('show');
+    else btn.classList.remove('show');
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  btn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if (prefersReduced) {
+      window.scrollTo(0,0);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // optional: Fokus nach oben verschieben (A11y)
+    const topEl = document.getElementById('top');
+    if (topEl) topEl.setAttribute('tabindex', '-1'), topEl.focus({ preventScroll:true });
+  });
+})();
