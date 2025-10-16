@@ -1,0 +1,16 @@
+{
+  "to": "buergermeisterin@stadt-kw.de",
+  "subject": "Bewerbung als Mitglied des Elternbeirats der Stadt Königs Wusterhausen",
+  "intro": [
+    "Sehr geehrte Frau Bürgermeisterin,",
+    "",
+    "gemäß § 12 Abs. 3 der Hauptsatzung der Stadt Königs Wusterhausen bewerbe ich mich hiermit als Mitglied des Elternbeirats.",
+    "",
+    "Ich möchte mich aktiv an der Vertretung der Interessen der Kinder und Familien in unserer Stadt beteiligen und einen Beitrag zu einer konstruktiven Zusammenarbeit zwischen Eltern, Einrichtungen und Verwaltung leisten.",
+    ""
+  ],
+  "closing": [
+    "Mit freundlichen Grüßen",
+    "[VORNAME] [NACHNAME]"
+  ]
+}
