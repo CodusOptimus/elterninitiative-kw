@@ -1,6 +1,6 @@
 {
   "source": "https://sessionnet.owl-it.de/koenigs_wusterhausen/bi/si0046.asp",
-  "generated_at": "2025-12-31T04:55:23.867511Z",
+  "generated_at": "2026-01-01T05:01:10.959718Z",
   "filters": [
     "Stadtverordnetenversammlung",
     "Hauptausschuss",
@@ -9,10 +9,6 @@
   ],
   "timezone": "Europe/Berlin",
   "months_loaded": [
-    [
-      2025,
-      12
-    ],
     [
       2026,
       1
@@ -24,6 +20,10 @@
     [
       2026,
       3
+    ],
+    [
+      2026,
+      4
     ]
   ],
   "items": [
@@ -55,6 +55,26 @@
         "end": ""
       },
       "location": "Sitzung der Stadtverordnetenversammlung 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
+      "detail_url": ""
+    },
+    {
+      "title": "Ausschuss für Soziales, Bildung, Familie, Brandschutz, Ordnung, Sport und Kultur 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
+      "date": "14.04.2026",
+      "time": {
+        "start": "17:00",
+        "end": ""
+      },
+      "location": "Ausschuss für Soziales, Bildung, Familie, Brandschutz, Ordnung, Sport und Kultur 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
+      "detail_url": ""
+    },
+    {
+      "title": "Sitzung des Hauptausschusses 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
+      "date": "27.04.2026",
+      "time": {
+        "start": "17:00",
+        "end": ""
+      },
+      "location": "Sitzung des Hauptausschusses 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
       "detail_url": ""
     }
   ]
