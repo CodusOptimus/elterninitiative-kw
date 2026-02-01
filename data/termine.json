@@ -1,6 +1,6 @@
 {
   "source": "https://sessionnet.owl-it.de/koenigs_wusterhausen/bi/si0046.asp",
-  "generated_at": "2026-01-31T05:12:51.017540Z",
+  "generated_at": "2026-02-01T05:42:28.268954Z",
   "filters": [
     "Stadtverordnetenversammlung",
     "Hauptausschuss",
@@ -9,10 +9,6 @@
   ],
   "timezone": "Europe/Berlin",
   "months_loaded": [
-    [
-      2026,
-      1
-    ],
     [
       2026,
       2
@@ -24,6 +20,10 @@
     [
       2026,
       4
+    ],
+    [
+      2026,
+      5
     ]
   ],
   "items": [
@@ -95,6 +95,16 @@
         "end": ""
       },
       "location": "Sitzung des Hauptausschusses 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
+      "detail_url": ""
+    },
+    {
+      "title": "Sitzung der Stadtverordnetenversammlung 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
+      "date": "11.05.2026",
+      "time": {
+        "start": "17:00",
+        "end": ""
+      },
+      "location": "Sitzung der Stadtverordnetenversammlung 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3",
       "detail_url": ""
     }
   ]
