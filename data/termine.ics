@@ -4,8 +4,8 @@ PRODID:-//Elterninitiative KW//Termine//DE
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
-UID:20260414T150000Z-2745080729685585517@elterninitiative-kw
-DTSTAMP:20260305T053006Z
+UID:20260414T150000Z-9060058994922858043@elterninitiative-kw
+DTSTAMP:20260306T053000Z
 DTSTART:20260414T150000Z
 DTEND:20260413T220000Z
 SUMMARY:Ausschuss für Soziales, Bildung, Familie, Brandschutz, Ordnung, Sport und Kultur 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3
@@ -13,8 +13,8 @@ LOCATION:Ausschuss für Soziales, Bildung, Familie, Brandschutz, Ordnung, Sport 
 URL:
 END:VEVENT
 BEGIN:VEVENT
-UID:20260427T150000Z-5959331603774086402@elterninitiative-kw
-DTSTAMP:20260305T053006Z
+UID:20260427T150000Z-2370246546615064469@elterninitiative-kw
+DTSTAMP:20260306T053000Z
 DTSTART:20260427T150000Z
 DTEND:20260426T220000Z
 SUMMARY:Sitzung des Hauptausschusses 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3
@@ -22,8 +22,8 @@ LOCATION:Sitzung des Hauptausschusses 17:00 Uhr 15711 Königs Wusterhausen, Saal
 URL:
 END:VEVENT
 BEGIN:VEVENT
-UID:20260511T150000Z-267947492659709053@elterninitiative-kw
-DTSTAMP:20260305T053006Z
+UID:20260511T150000Z-469523874828337039@elterninitiative-kw
+DTSTAMP:20260306T053000Z
 DTSTART:20260511T150000Z
 DTEND:20260510T220000Z
 SUMMARY:Sitzung der Stadtverordnetenversammlung 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3
@@ -31,8 +31,8 @@ LOCATION:Sitzung der Stadtverordnetenversammlung 17:00 Uhr 15711 Königs Wusterh
 URL:
 END:VEVENT
 BEGIN:VEVENT
-UID:20260616T150000Z-5147376196855497810@elterninitiative-kw
-DTSTAMP:20260305T053006Z
+UID:20260616T150000Z-2792561631955210076@elterninitiative-kw
+DTSTAMP:20260306T053000Z
 DTSTART:20260616T150000Z
 DTEND:20260615T220000Z
 SUMMARY:Ausschuss für Soziales, Bildung, Familie, Brandschutz, Ordnung, Sport und Kultur 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3
@@ -40,8 +40,8 @@ LOCATION:Ausschuss für Soziales, Bildung, Familie, Brandschutz, Ordnung, Sport 
 URL:
 END:VEVENT
 BEGIN:VEVENT
-UID:20260629T150000Z-2052735087220788083@elterninitiative-kw
-DTSTAMP:20260305T053006Z
+UID:20260629T150000Z-4661392909590843715@elterninitiative-kw
+DTSTAMP:20260306T053000Z
 DTSTART:20260629T150000Z
 DTEND:20260628T220000Z
 SUMMARY:Sitzung des Hauptausschusses 17:00 Uhr 15711 Königs Wusterhausen, Saal im Rathaus Königs Wusterhausen, Haus A, Schlossstraße 3
